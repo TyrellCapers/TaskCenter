@@ -8,7 +8,7 @@ public class Task {
     public static final String OBJECT_NAME = "Task";
     private static Integer s_objectCounter = 1;
 
-    private String id;
+    private final String id;
     private String name;
     private String description;
     private Date targetDate;
@@ -27,7 +27,7 @@ public class Task {
     private Long timePending;
     private TaskCategory category;
     private ArrayList<TaskHistoryItem> taskHistoryItems;
-    private Long createTime;
+    private final Long createTime;
 
     public Task(){
         //Initialize the createTime
@@ -38,6 +38,14 @@ public class Task {
         s_objectCounter++;
     }
 
+
+    public void createHistoryItem(String eventName, String description, Long eventTime){
+        TaskHistoryItem item = new TaskHistoryItem(this);
+        item.setEventName(eventName);
+        item.setDescription(description);
+        item.setEventTime(eventTime);
+        taskHistoryItems.add(item);
+    }
 
     public Long getCreateTime(){
         return this.createTime;

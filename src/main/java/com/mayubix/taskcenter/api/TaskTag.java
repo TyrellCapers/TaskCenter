@@ -5,12 +5,15 @@ public class TaskTag {
     public static final String OBJECT_NAME = "TaskTag";
     private static Integer s_objectCounter = 1;
 
-    private String id;
+    private final String id;
     private String name;
     private Task task;
-    private Long createTime;
+    private final Long createTime;
 
-    public TaskTag(){
+    public TaskTag(Task task){
+        //Initialize task
+        this.task = task;
+
         //Initialize the createTime
         this.createTime = System.currentTimeMillis();
 

@@ -7,13 +7,16 @@ public class TaskNote {
     public static final String OBJECT_NAME = "TaskNote";
     private static Integer s_objectCounter = 1;
 
-    private String id;
+    private final String id;
     private String name;
     private String content;
-    private Long createTime;
+    private final Long createTime;
     private Task task;
 
-    public TaskNote(){
+    public TaskNote(Task task){
+        //Initialize task
+        this.task = task;
+
         //Initialize the createTime
         this.createTime = System.currentTimeMillis();
 

@@ -7,14 +7,17 @@ public class TaskHistoryItem {
     public static final String OBJECT_NAME = "TaskHistoryItem";
     private static Integer s_objectCounter = 1;
 
-    private String  id;
+    private final String  id;
     private String  description;
     private String  eventName;
     private Long    eventTime;
     private Task    task;
-    private Long    createTime;
+    private final Long    createTime;
 
-    public TaskHistoryItem(){
+    public TaskHistoryItem(Task task){
+        //Initialize task
+        this.task = task;
+
         //Initialize the createTime
         this.createTime = System.currentTimeMillis();
 

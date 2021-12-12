@@ -5,12 +5,15 @@ public class TaskCategory {
     public static final String OBJECT_NAME = "TaskCategory";
     private static Integer s_objectCounter = 1;
 
-    private String id;
+    private final String id;
     private String name;
     private Task task;
-    private Long createTime;
+    private final Long createTime;
 
-    public TaskCategory(){
+    public TaskCategory(Task task){
+        //Initialize the task
+        this.task = task;
+
         //Initialize the createTime
         this.createTime = System.currentTimeMillis();
 
