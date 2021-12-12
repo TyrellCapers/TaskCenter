@@ -4,6 +4,10 @@ import java.util.Date;
 import java.util.ArrayList;
 
 public class Task {
+
+    public static final String OBJECT_NAME = "Task";
+    private static Integer s_objectCounter = 1;
+
     private String id;
     private String name;
     private String description;
@@ -26,7 +30,12 @@ public class Task {
     private Long createTime;
 
     public Task(){
+        //Initialize the createTime
         this.createTime = System.currentTimeMillis();
+
+        //Initialize the id
+        this.id = OBJECT_NAME + ":" + s_objectCounter;
+        s_objectCounter++;
     }
 
 
@@ -36,10 +45,6 @@ public class Task {
 
     public String getId() {
         return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
     }
 
     public String getName() {

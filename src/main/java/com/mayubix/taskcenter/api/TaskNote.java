@@ -4,6 +4,9 @@ import java.util.Date;
 
 public class TaskNote {
 
+    public static final String OBJECT_NAME = "TaskNote";
+    private static Integer s_objectCounter = 1;
+
     private String id;
     private String name;
     private String content;
@@ -11,15 +14,16 @@ public class TaskNote {
     private Task task;
 
     public TaskNote(){
+        //Initialize the createTime
         this.createTime = System.currentTimeMillis();
+
+        //Initialize the id
+        this.id = OBJECT_NAME + ":" + s_objectCounter;
+        s_objectCounter++;
     }
 
     public String getId() {
         return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
     }
 
     public String getName() {

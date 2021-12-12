@@ -1,6 +1,9 @@
 package com.mayubix.taskcenter.api;
 
 public class TaskStep {
+    public static final String OBJECT_NAME = "TaskStep";
+    private static Integer s_objectCounter = 1;
+
     private String id;
     private String name;
     private String description;
@@ -8,7 +11,12 @@ public class TaskStep {
     private Task task;
 
     public TaskStep(){
+        //Initialize the createTime
         this.createTime = System.currentTimeMillis();
+
+        //Initialize the id
+        this.id = OBJECT_NAME + ":" + s_objectCounter;
+        s_objectCounter++;
     }
 
     public Task getTask(){
@@ -21,10 +29,6 @@ public class TaskStep {
 
     public String getId() {
         return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
     }
 
     public String getName() {
