@@ -50,7 +50,7 @@ public class TaskStatus {
 
         //[2.2] When a task is completed, the task's completion date is automatically set to the current date
         if(origValue != TaskStatusValue.COMPLETED && this.status == TaskStatusValue.COMPLETED){
-            this.task.setCompletionDate(new Date(System.currentTimeMillis()));
+            this.task.setCompletionDate(System.currentTimeMillis());
         }
 
         //[2.3] When a task status changes, history item is created on the task

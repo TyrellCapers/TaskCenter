@@ -1,21 +1,29 @@
 package com.mayubix.taskcenter.api;
 
+import com.mayubix.taskcenter.updateloops.TaskUpdateLoop;
 import java.util.Date;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 public class Task {
 
+    public static HashMap<String, Task> s_taskObjects = new HashMap<>(); //[Important Note]: Collection might prevent unreferenced tasks from being garbage collected.
+    public static final Integer THREAD_POOL_SIZE = 10;
     public static final String OBJECT_NAME = "Task";
+    public static final Long UPDATE_INTERVAL = 100L;
+
     private static Integer s_objectCounter = 1;
+    private static ScheduledThreadPoolExecutor s_updateWorkQueue = new ScheduledThreadPoolExecutor(THREAD_POOL_SIZE);
 
     private final String id;
     private String name;
     private String description;
-    private Date targetDate;
-    private Date createDate;
+    private Long targetDate;
     private Long timeElapsed;
     private Long timeWorked;
-    private Date completionDate;
+    private Long completionDate;
     private Long timePassedTargetDate;
     private TaskStep currentStep;
     private ArrayList<TaskStep> steps;
@@ -36,6 +44,12 @@ public class Task {
         //Initialize the id
         this.id = OBJECT_NAME + ":" + s_objectCounter;
         s_objectCounter++;
+
+        //Add to the s_taskObjects map
+        s_taskObjects.put(this.id, this);
+
+        //Schedule the Task Update Loop
+        s_updateWorkQueue.scheduleWithFixedDelay(new TaskUpdateLoop(this,  UPDATE_INTERVAL), UPDATE_INTERVAL, UPDATE_INTERVAL, TimeUnit.MILLISECONDS);
     }
 
 
@@ -71,20 +85,12 @@ public class Task {
         this.description = description;
     }
 
-    public Date getTargetDate() {
+    public Long getTargetDate() {
         return targetDate;
     }
 
-    public void setTargetDate(Date targetDate) {
+    public void setTargetDate(Long targetDate) {
         this.targetDate = targetDate;
-    }
-
-    public Date getCreateDate() {
-        return createDate;
-    }
-
-    public void setCreateDate(Date createDate) {
-        this.createDate = createDate;
     }
 
     public Long getTimeElapsed() {
@@ -103,11 +109,11 @@ public class Task {
         this.timeWorked = timeWorked;
     }
 
-    public Date getCompletionDate() {
+    public Long getCompletionDate() {
         return completionDate;
     }
 
-    public void setCompletionDate(Date completionDate) {
+    public void setCompletionDate(Long completionDate) {
         this.completionDate = completionDate;
     }
 
