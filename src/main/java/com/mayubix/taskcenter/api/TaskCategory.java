@@ -8,7 +8,7 @@ public class TaskCategory {
     private Long createTime;
 
     public TaskCategory(){
-
+        this.createTime = System.currentTimeMillis();
     }
 
     public Long getCreateTime(){

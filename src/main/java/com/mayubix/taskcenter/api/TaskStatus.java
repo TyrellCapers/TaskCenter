@@ -8,7 +8,7 @@ public class TaskStatus {
     private Long createTime;
 
     public TaskStatus(){
-
+        this.createTime = System.currentTimeMillis();
     }
 
     public Long getCreateTime(){

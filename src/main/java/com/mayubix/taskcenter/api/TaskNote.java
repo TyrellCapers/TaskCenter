@@ -10,6 +10,10 @@ public class TaskNote {
     private Long createTime;
     private Task task;
 
+    public TaskNote(){
+        this.createTime = System.currentTimeMillis();
+    }
+
     public String getId() {
         return id;
     }

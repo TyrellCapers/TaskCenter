@@ -7,7 +7,7 @@ public class TaskTag {
     private Long createTime;
 
     public TaskTag(){
-
+        this.createTime = System.currentTimeMillis();
     }
 
     public Long getCreateTime(){

@@ -8,7 +8,7 @@ public class TaskStep {
     private Task task;
 
     public TaskStep(){
-
+        this.createTime = System.currentTimeMillis();
     }
 
     public Task getTask(){

@@ -11,6 +11,10 @@ public class TaskHistoryItem {
     private Task    task;
     private Long    createTime;
 
+    public TaskHistoryItem(){
+        this.createTime = System.currentTimeMillis();
+    }
+
     public Long getCreateTime(){
         return this.createTime;
     }

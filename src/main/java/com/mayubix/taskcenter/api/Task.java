@@ -26,7 +26,7 @@ public class Task {
     private Long createTime;
 
     public Task(){
-
+        this.createTime = System.currentTimeMillis();
     }
 
 
