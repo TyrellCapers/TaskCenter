@@ -42,10 +42,6 @@ public class TaskNote {
         return createTime;
     }
 
-    public void setCreateTime(Long createTime) {
-        this.createTime = createTime;
-    }
-
     public Task getTask() {
         return task;
     }

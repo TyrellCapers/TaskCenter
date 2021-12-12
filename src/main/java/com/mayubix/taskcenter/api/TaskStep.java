@@ -47,7 +47,4 @@ public class TaskStep {
         return createTime;
     }
 
-    public void setCreateTime(Long createTime) {
-        this.createTime = createTime;
-    }
 }
