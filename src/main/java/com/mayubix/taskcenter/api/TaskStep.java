@@ -8,6 +8,7 @@ public class TaskStep {
     private String name;
     private String description;
     private final Long createTime;
+    private TaskStepStatusValue statusValue;
     private Task task;
 
     public TaskStep(Task task){
@@ -54,4 +55,11 @@ public class TaskStep {
         return createTime;
     }
 
+    public TaskStepStatusValue getStatusValue() {
+        return statusValue;
+    }
+
+    public void setStatusValue(TaskStepStatusValue statusValue) {
+        this.statusValue = statusValue;
+    }
 }

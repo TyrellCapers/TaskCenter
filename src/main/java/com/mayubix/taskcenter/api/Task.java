@@ -53,6 +53,15 @@ public class Task {
         this.future = s_updateWorkQueue.scheduleWithFixedDelay(new TaskUpdateLoop(this,  UPDATE_INTERVAL), UPDATE_INTERVAL, UPDATE_INTERVAL, TimeUnit.MILLISECONDS);
     }
 
+    public TaskStep createTaskStep(String name, String description){
+        TaskStep step = new TaskStep(this);
+        step.setName(name);
+        step.setDescription(description);
+        step.setStatusValue(TaskStepStatusValue.INCOMPLETE);
+        this.steps.add(step);
+        return step;
+    }
+
     //Clean method should be run whenever a task is 'deleted'
     public void clean(){
         s_taskObjects.put(this.id, null);
