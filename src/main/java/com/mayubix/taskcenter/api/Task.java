@@ -1,9 +1,9 @@
 package com.mayubix.taskcenter.api;
 
 import com.mayubix.taskcenter.updateloops.TaskUpdateLoop;
-import java.util.Date;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -15,7 +15,7 @@ public class Task {
     public static final Long UPDATE_INTERVAL = 100L;
 
     private static Integer s_objectCounter = 1;
-    private static ScheduledThreadPoolExecutor s_updateWorkQueue = new ScheduledThreadPoolExecutor(THREAD_POOL_SIZE);
+    private static final ScheduledThreadPoolExecutor s_updateWorkQueue = new ScheduledThreadPoolExecutor(THREAD_POOL_SIZE);
 
     private final String id;
     private String name;
@@ -36,6 +36,7 @@ public class Task {
     private TaskCategory category;
     private ArrayList<TaskHistoryItem> taskHistoryItems;
     private final Long createTime;
+    private ScheduledFuture<?> future;
 
     public Task(){
         //Initialize the createTime
@@ -49,9 +50,14 @@ public class Task {
         s_taskObjects.put(this.id, this);
 
         //Schedule the Task Update Loop
-        s_updateWorkQueue.scheduleWithFixedDelay(new TaskUpdateLoop(this,  UPDATE_INTERVAL), UPDATE_INTERVAL, UPDATE_INTERVAL, TimeUnit.MILLISECONDS);
+        this.future = s_updateWorkQueue.scheduleWithFixedDelay(new TaskUpdateLoop(this,  UPDATE_INTERVAL), UPDATE_INTERVAL, UPDATE_INTERVAL, TimeUnit.MILLISECONDS);
     }
 
+    //Clean method should be run whenever a task is 'deleted'
+    public void clean(){
+        s_taskObjects.put(this.id, null);
+        this.future.cancel(false);
+    }
 
     public void createHistoryItem(String eventName, String description, Long eventTime){
         TaskHistoryItem item = new TaskHistoryItem(this);
