@@ -36,9 +36,15 @@ public class Task {
     private TaskCategory category;
     private ArrayList<TaskHistoryItem> taskHistoryItems;
     private final Long createTime;
-    private ScheduledFuture<?> future;
+    private final ScheduledFuture<?> future;
 
     public Task(){
+        //Initialize arrays
+        steps = new ArrayList<>();
+        notes = new ArrayList<>();
+        tags =  new ArrayList<>();
+        taskHistoryItems = new ArrayList<>();
+
         //Initialize the createTime
         this.createTime = System.currentTimeMillis();
 
@@ -51,6 +57,53 @@ public class Task {
 
         //Schedule the Task Update Loop
         this.future = s_updateWorkQueue.scheduleWithFixedDelay(new TaskUpdateLoop(this,  UPDATE_INTERVAL), UPDATE_INTERVAL, UPDATE_INTERVAL, TimeUnit.MILLISECONDS);
+    }
+
+    public ArrayList<TaskStep> getSteps() {
+        return steps;
+    }
+
+    public void setSteps(ArrayList<TaskStep> steps) {
+        this.steps = steps;
+    }
+
+    public ArrayList<TaskNote> getNotes() {
+        return notes;
+    }
+
+    public void setNotes(ArrayList<TaskNote> notes) {
+        this.notes = notes;
+    }
+
+    public ArrayList<TaskTag> getTags() {
+        return tags;
+    }
+
+    public void setTags(ArrayList<TaskTag> tags) {
+        this.tags = tags;
+    }
+
+    public ArrayList<TaskHistoryItem> getTaskHistoryItems() {
+        return taskHistoryItems;
+    }
+
+    public void setTaskHistoryItems(ArrayList<TaskHistoryItem> taskHistoryItems) {
+        this.taskHistoryItems = taskHistoryItems;
+    }
+
+    public TaskTag createTaskTag(String name){
+        TaskTag tag = new TaskTag(this);
+        tag.setName(name);
+        this.tags.add(tag);
+        return tag;
+    }
+
+    public TaskNote createTaskNote(String name, String content){
+        TaskNote note = new TaskNote(this);
+        note.setName(name);
+        note.setContent(content);
+        this.notes.add(note);
+        return note;
     }
 
     public TaskStep createTaskStep(String name, String description){
@@ -68,12 +121,13 @@ public class Task {
         this.future.cancel(false);
     }
 
-    public void createHistoryItem(String eventName, String description, Long eventTime){
+    public TaskHistoryItem createHistoryItem(String eventName, String description, Long eventTime){
         TaskHistoryItem item = new TaskHistoryItem(this);
         item.setEventName(eventName);
         item.setDescription(description);
         item.setEventTime(eventTime);
         taskHistoryItems.add(item);
+        return item;
     }
 
     public Long getCreateTime(){
