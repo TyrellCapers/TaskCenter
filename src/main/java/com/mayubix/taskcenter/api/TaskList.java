@@ -1,7 +1,6 @@
 package com.mayubix.taskcenter.api;
 
 import java.util.ArrayList;
-import java.util.Date;
 
 public class TaskList {
     public static final String OBJECT_NAME = "TaskList";
@@ -61,7 +60,71 @@ public class TaskList {
     }
 
     public void editTaskSize(Task task, Short size){
+        task.setSize(size);
+    }
 
+    public void editTaskPriority(Task task, Short priority){
+        task.setPriority(priority);
+    }
+
+    public void initTaskStatus(Task task, TaskStatusValue statusValue){
+        TaskStatus status = new TaskStatus(task);
+        status.setStatus(statusValue);
+        task.setStatus(status);
+    }
+
+    public void initTaskCategory(Task task, String categoryValue){
+        TaskCategory category = new TaskCategory(task);
+        category.setName(categoryValue);
+        task.setCategory(category);
+    }
+
+    public void addTaskStep(Task task, String name, String description){
+        task.createTaskStep(name, description);
+    }
+
+    public void editTaskStepDescription(Task task, TaskStep taskStep, String description){
+        ArrayList<TaskStep> steps = task.getSteps();
+        int index = steps.indexOf(taskStep);
+        TaskStep step = steps.get(index);
+        step.setDescription(description);
+    }
+
+    public void editTaskStepName(Task task, TaskStep taskStep, String name){
+        ArrayList<TaskStep> steps = task.getSteps();
+        int index = steps.indexOf(taskStep);
+        TaskStep step = steps.get(index);
+        step.setDescription(name);
+    }
+
+    public void removeTaskStep(Task task, TaskStep taskStep){
+        ArrayList<TaskStep> steps = task.getSteps();
+        steps.remove(taskStep);
+    }
+
+    public void addTaskNote(Task task, String name, String content){
+        task.createTaskNote(name, content);
+    }
+
+    public void removeTaskNote(Task task, TaskNote note){
+        ArrayList<TaskNote> notes = task.getNotes();
+        notes.remove(note);
+    }
+
+    public void addTaskTag(Task task, String name){
+        task.createTaskTag(name);
+    }
+
+    public void removeTaskTag(Task task, TaskTag tag){
+        task.getTags().remove(tag);
+    }
+
+    public void addTaskHistoryItem(Task task,  String eventName, String eventDescription){
+        task.createHistoryItem(eventName, eventDescription, System.currentTimeMillis());
+    }
+
+    public void removeTaskHistoryItem(Task task, TaskHistoryItem item){
+        task.getTaskHistoryItems().remove(item);
     }
 
 }

@@ -20,6 +20,7 @@ public class TaskCategory {
         //Initialize the id
         this.id = OBJECT_NAME + ":" + s_objectCounter;
         s_objectCounter++;
+
     }
 
     public Long getCreateTime(){
