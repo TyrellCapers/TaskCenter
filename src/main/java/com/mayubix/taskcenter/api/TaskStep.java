@@ -21,6 +21,9 @@ public class TaskStep {
         //Initialize the id
         this.id = OBJECT_NAME + ":" + s_objectCounter;
         s_objectCounter++;
+
+        //Initialize status value
+        this.setStatusValue(TaskStepStatusValue.INCOMPLETE);
     }
 
     public Task getTask(){
@@ -61,5 +64,18 @@ public class TaskStep {
 
     public void setStatusValue(TaskStepStatusValue statusValue) {
         this.statusValue = statusValue;
+    }
+
+    public String getStatusValueString(){
+        return switch(this.statusValue){
+            case INCOMPLETE -> "Incomplete";
+            case COMPLETE   -> "Complete";
+            default         -> "No Value";
+        };
+    }
+
+    @Override
+    public String toString(){
+        return this.getName();
     }
 }

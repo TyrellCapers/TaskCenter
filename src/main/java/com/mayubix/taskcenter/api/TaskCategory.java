@@ -21,6 +21,9 @@ public class TaskCategory {
         this.id = OBJECT_NAME + ":" + s_objectCounter;
         s_objectCounter++;
 
+        //Default Category Name
+        this.setName("");
+
     }
 
     public Long getCreateTime(){
@@ -45,5 +48,10 @@ public class TaskCategory {
 
     public void setTask(Task val){
         this.task = val;
+    }
+
+    @Override
+    public String toString(){
+        return this.getName();
     }
 }

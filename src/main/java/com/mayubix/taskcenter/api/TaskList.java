@@ -19,6 +19,82 @@ public class TaskList {
         tasks = new ArrayList<>();
     }
 
+    public TaskStep findStepById(Task task, String id){
+        int count = 0;
+        boolean found = false;
+        TaskStep step = null;
+
+        while(!found && count < task.getSteps().size()){
+            step = task.getSteps().get(count);
+            if(step.getId().equals(id)){
+                found = true;
+            }
+            else{
+                count++;
+            }
+        }
+
+        return step;
+    }
+
+    public TaskNote findNoteById(Task task, String id){
+        int count = 0;
+        boolean found = false;
+        TaskNote note = null;
+
+        while(!found && count < task.getNotes().size()){
+            note = task.getNotes().get(count);
+            if(note.getId().equals(id)){
+                found = true;
+            }
+            else{
+                count++;
+            }
+        }
+
+        return note;
+    }
+
+    public TaskHistoryItem findHistoryItemById(Task task, String id){
+        int count = 0;
+        boolean found = false;
+        TaskHistoryItem historyItem = null;
+
+        while(!found && count < task.getTaskHistoryItems().size()){
+            historyItem = task.getTaskHistoryItems().get(count);
+            if(historyItem.getId().equals(id)){
+                found = true;
+            }
+            else{
+                count++;
+            }
+        }
+
+        return historyItem;
+    }
+
+    public TaskTag findTagById(Task task, String id){
+        int count = 0;
+        boolean found = false;
+        TaskTag tag = null;
+
+        while(!found && count < task.getTags().size()){
+            tag = task.getTags().get(count);
+            if(tag.getId().equals(id)){
+                found = true;
+            }
+            else{
+                count++;
+            }
+        }
+
+        return tag;
+    }
+
+    public Task findTaskById(String id){
+        return Task.s_taskObjects.get(id);
+    }
+
     public String getId(){
         return this.id;
     }
@@ -94,7 +170,7 @@ public class TaskList {
         ArrayList<TaskStep> steps = task.getSteps();
         int index = steps.indexOf(taskStep);
         TaskStep step = steps.get(index);
-        step.setDescription(name);
+        step.setName(name);
     }
 
     public void removeTaskStep(Task task, TaskStep taskStep){

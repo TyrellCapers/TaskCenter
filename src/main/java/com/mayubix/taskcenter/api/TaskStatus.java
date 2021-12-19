@@ -24,6 +24,21 @@ public class TaskStatus {
         s_objectCounter++;
     }
 
+    public TaskStatus(Task task, TaskStatusValue value){
+        //Initialize task
+        this.task = task;
+
+        //Initialize the createTime
+        this.createTime = System.currentTimeMillis();
+
+        //Initialize the id
+        this.id = OBJECT_NAME + ":" + s_objectCounter;
+        s_objectCounter++;
+
+        //Set Status
+        this.setStatus(value);
+    }
+
     public void setTask(Task val){
         this.task = val;
     }
@@ -57,5 +72,17 @@ public class TaskStatus {
         if(origValue != this.status){
             task.createHistoryItem("Status Changed", "Task status changed to " + this.status, System.currentTimeMillis());
         }
+    }
+
+    @Override
+    public String toString(){
+        return switch(this.getStatus()){
+            case NOT_STARTED -> "Not Started";
+            case IDLE        -> "Idle";
+            case PENDING     -> "Pending";
+            case WORKING     -> "Working";
+            case COMPLETED   -> "Completed";
+            default          -> "Unknown Status";
+        };
     }
 }

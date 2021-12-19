@@ -34,6 +34,10 @@ public class TaskTag {
         return name;
     }
 
+    public Task getTask(){
+        return this.task;
+    }
+
     public void setName(String name) {
         this.name = name;
     }

@@ -57,7 +57,23 @@ public class Task {
 
         //Schedule the Task Update Loop
         this.future = s_updateWorkQueue.scheduleWithFixedDelay(new TaskUpdateLoop(this,  UPDATE_INTERVAL), UPDATE_INTERVAL, UPDATE_INTERVAL, TimeUnit.MILLISECONDS);
-    }
+
+        //Default the fields
+        this.name = "";
+        this.description = "";
+        this.targetDate = System.currentTimeMillis();
+        this.timeElapsed = 0L;
+        this.timeWorked = 0L;
+        //this.completionDate = null;
+        this.timePassedTargetDate = 0L;
+        //this.currentStep = null;
+        this.size = 1;
+        this.priority = 1;
+        this.status = new TaskStatus(this, TaskStatusValue.NOT_STARTED);
+        this.timePending = 0L;
+        this.category = new TaskCategory(this);
+
+     }
 
     public ArrayList<TaskStep> getSteps() {
         return steps;
