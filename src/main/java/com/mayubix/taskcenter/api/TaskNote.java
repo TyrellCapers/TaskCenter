@@ -13,6 +13,18 @@ public class TaskNote {
     private final Long createTime;
     private Task task;
 
+    public TaskNote(String id, Long createTime, Task task){
+        //Initialize task
+        this.task = task;
+
+        //Initialize the createTime
+        this.createTime = createTime;
+
+        //Initialize the id
+        this.id = id;
+        s_objectCounter++;
+    }
+
     public TaskNote(Task task){
         //Initialize task
         this.task = task;

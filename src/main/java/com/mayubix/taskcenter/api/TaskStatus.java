@@ -39,6 +39,21 @@ public class TaskStatus {
         this.setStatus(value);
     }
 
+    public TaskStatus(String id, Long createTime, Task task, String value){
+        //Initialize task
+        this.task = task;
+
+        //Initialize the createTime
+        this.createTime = createTime;
+
+        //Initialize the id
+        this.id = id;
+        s_objectCounter++;
+
+        //Set Status
+        this.parseTaskStatusValue(value);
+    }
+
     public void setTask(Task val){
         this.task = val;
     }
@@ -72,6 +87,17 @@ public class TaskStatus {
         if(origValue != this.status){
             task.createHistoryItem("Status Changed", "Task status changed to " + this.status, System.currentTimeMillis());
         }
+    }
+
+    public void parseTaskStatusValue(String val){
+        this.status = switch(val){
+            case "Not Started" -> TaskStatusValue.NOT_STARTED;
+            case "Idle"        -> TaskStatusValue.IDLE;
+            case "Pending"     -> TaskStatusValue.PENDING;
+            case "Working"     -> TaskStatusValue.WORKING;
+            case "Completed"   -> TaskStatusValue.COMPLETED;
+            default            -> TaskStatusValue.NOT_STARTED; //todo replace with logic to infer default value
+        };
     }
 
     @Override

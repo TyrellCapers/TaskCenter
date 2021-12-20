@@ -22,6 +22,18 @@ public class TaskTag {
         s_objectCounter++;
     }
 
+    public TaskTag(String id, Long createTime, Task task){
+        //Initialize task
+        this.task = task;
+
+        //Initialize the createTime
+        this.createTime = createTime;
+
+        //Initialize the id
+        this.id = id;
+        s_objectCounter++;
+    }
+
     public Long getCreateTime(){
         return this.createTime;
     }

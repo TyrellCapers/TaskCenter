@@ -14,6 +14,19 @@ public class TaskHistoryItem {
     private Task    task;
     private final Long    createTime;
 
+    public TaskHistoryItem(String id, Long createTime, Task task){
+        //Initialize task
+        this.task = task;
+
+        //Initialize the createTime
+        this.createTime = createTime;
+
+        //Initialize the id
+        this.id = id;
+        s_objectCounter++;
+
+    }
+
     public TaskHistoryItem(Task task){
         //Initialize task
         this.task = task;

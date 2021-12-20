@@ -38,6 +38,42 @@ public class Task {
     private final Long createTime;
     private final ScheduledFuture<?> future;
 
+    public Task(String id, Long createTime){
+        //Initialize arrays
+        steps = new ArrayList<>();
+        notes = new ArrayList<>();
+        tags =  new ArrayList<>();
+        taskHistoryItems = new ArrayList<>();
+
+        //Initialize the createTime
+        this.createTime = createTime;
+
+        //Initialize the id
+        this.id = id;
+        s_objectCounter++;
+
+        //Add to the s_taskObjects map
+        s_taskObjects.put(this.id, this);
+
+        //Schedule the Task Update Loop
+        this.future = s_updateWorkQueue.scheduleWithFixedDelay(new TaskUpdateLoop(this,  UPDATE_INTERVAL), UPDATE_INTERVAL, UPDATE_INTERVAL, TimeUnit.MILLISECONDS);
+
+        //Default the fields
+        this.name = "";
+        this.description = "";
+        this.targetDate = System.currentTimeMillis();
+        this.timeElapsed = 0L;
+        this.timeWorked = 0L;
+        //this.completionDate = null;
+        this.timePassedTargetDate = 0L;
+        //this.currentStep = null;
+        this.size = 1;
+        this.priority = 1;
+        this.status = new TaskStatus(this, TaskStatusValue.NOT_STARTED);
+        this.timePending = 0L;
+        this.category = new TaskCategory(this);
+    }
+
     public Task(){
         //Initialize arrays
         steps = new ArrayList<>();
@@ -114,8 +150,23 @@ public class Task {
         return tag;
     }
 
+    public TaskTag createTaskTag(String id, Long createTime, String name){
+        TaskTag tag = new TaskTag(id, createTime, this);
+        tag.setName(name);
+        this.tags.add(tag);
+        return tag;
+    }
+
     public TaskNote createTaskNote(String name, String content){
         TaskNote note = new TaskNote(this);
+        note.setName(name);
+        note.setContent(content);
+        this.notes.add(note);
+        return note;
+    }
+
+    public TaskNote createTaskNote(String noteId, Long createTime, String name, String content){
+        TaskNote note = new TaskNote(noteId, createTime, this);
         note.setName(name);
         note.setContent(content);
         this.notes.add(note);
@@ -131,6 +182,15 @@ public class Task {
         return step;
     }
 
+    public TaskStep createTaskStep(String id, String name, String description, Long createTime){
+        TaskStep step = new TaskStep(id, createTime,this);
+        step.setName(name);
+        step.setDescription(description);
+        step.setStatusValue(TaskStepStatusValue.INCOMPLETE);
+        this.steps.add(step);
+        return step;
+    }
+
     //Clean method should be run whenever a task is 'deleted'
     public void clean(){
         s_taskObjects.put(this.id, null);
@@ -139,6 +199,15 @@ public class Task {
 
     public TaskHistoryItem createHistoryItem(String eventName, String description, Long eventTime){
         TaskHistoryItem item = new TaskHistoryItem(this);
+        item.setEventName(eventName);
+        item.setDescription(description);
+        item.setEventTime(eventTime);
+        taskHistoryItems.add(item);
+        return item;
+    }
+
+    public TaskHistoryItem createHistoryItem(String id, Long createTime, String eventName, String description, Long eventTime){
+        TaskHistoryItem item = new TaskHistoryItem(id, createTime, this);
         item.setEventName(eventName);
         item.setDescription(description);
         item.setEventTime(eventTime);

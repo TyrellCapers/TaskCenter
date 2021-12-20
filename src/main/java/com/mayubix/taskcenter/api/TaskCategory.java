@@ -10,6 +10,22 @@ public class TaskCategory {
     private Task task;
     private final Long createTime;
 
+    public TaskCategory(String id, Long createTime, Task task){
+        //Initialize the task
+        this.task = task;
+
+        //Initialize the createTime
+        this.createTime = createTime;
+
+        //Initialize the id
+        this.id = id;
+        s_objectCounter++;
+
+        //Default Category Name
+        this.setName("");
+
+    }
+
     public TaskCategory(Task task){
         //Initialize the task
         this.task = task;

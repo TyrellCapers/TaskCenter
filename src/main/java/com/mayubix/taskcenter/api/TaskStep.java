@@ -11,6 +11,21 @@ public class TaskStep {
     private TaskStepStatusValue statusValue;
     private Task task;
 
+    public TaskStep(String id, Long createTime, Task task){
+        //Initialize task
+        this.task = task;
+
+        //Initialize the createTime
+        this.createTime = createTime;
+
+        //Initialize the id
+        this.id = id;
+        s_objectCounter++;
+
+        //Initialize status value
+        this.setStatusValue(TaskStepStatusValue.INCOMPLETE);
+    }
+
     public TaskStep(Task task){
         //Initialize task
         this.task = task;
@@ -25,6 +40,8 @@ public class TaskStep {
         //Initialize status value
         this.setStatusValue(TaskStepStatusValue.INCOMPLETE);
     }
+
+
 
     public Task getTask(){
         return this.task;
@@ -71,6 +88,14 @@ public class TaskStep {
             case INCOMPLETE -> "Incomplete";
             case COMPLETE   -> "Complete";
             default         -> "No Value";
+        };
+    }
+
+    public void parseStatusString(String val){
+        this.statusValue = switch(val){
+            case "Incomplete" -> TaskStepStatusValue.INCOMPLETE;
+            case "Complete"   -> TaskStepStatusValue.COMPLETE;
+            default           -> TaskStepStatusValue.INCOMPLETE;
         };
     }
 
