@@ -1,6 +1,7 @@
 package com.mayubix.taskcenter.scene;
 
 import com.mayubix.taskcenter.api.Task;
+import com.mayubix.taskcenter.api.TaskList;
 import com.mayubix.taskcenter.ui.TaskUI;
 import javafx.beans.property.Property;
 import javafx.event.ActionEvent;
@@ -18,11 +19,15 @@ import javafx.scene.paint.Paint;
 import javafx.stage.Stage;
 import org.controlsfx.control.tableview2.TableView2;
 
+import java.util.ArrayList;
+
 public class TaskListDashboard extends Scene {
     private GridPane layout;
     private TableView2 tlTable;
-
-    private ListView<String> actionListView;
+    private TaskList selectedTaskList;
+    private ArrayList<TaskList> taskLists = new ArrayList<>();
+    private ListView<TaskList> tlListView = new ListView<>();
+    private ListView<String> actionListView = new ListView<>();
 
     public TaskListDashboard(Parent root){
         super(root);
@@ -74,25 +79,19 @@ public class TaskListDashboard extends Scene {
     }
 
     private void buildLayout(){
-        //Action List View
-        actionListView = new ListView<String>();
-        layout.add(actionListView, 0, 0);
+        //Task List List View===========================================================================================
 
-        ColumnConstraints column0 = new ColumnConstraints();
-        column0.setHgrow(Priority.SOMETIMES);
-        layout.getColumnConstraints().add(column0);
 
+        //Action List View==============================================================================================
         actionListView.getItems().add("Sample Action");
 
-        //Task List Table
+        //Task List Table===============================================================================================
         tlTable = new TableView2<>();
-        layout.add(tlTable, 1, 0);
-
-        ColumnConstraints column1 = new ColumnConstraints();
-        column1.setHgrow(Priority.ALWAYS);
-        layout.getColumnConstraints().add(column1);
 
 
+
+
+        //Task List Table Columns=======================================================================================
         TableColumn taskIDCol = new TableColumn("Task ID");
         taskIDCol.setCellValueFactory(new PropertyValueFactory<TaskUI, String>("taskID"));
         tlTable.getColumns().add(taskIDCol);
@@ -153,7 +152,7 @@ public class TaskListDashboard extends Scene {
         createTimeCol.setCellValueFactory(new PropertyValueFactory<TaskUI, String>("createTime"));
         tlTable.getColumns().add(createTimeCol);
 
-        //Task List Table Context Menu
+        //Task List Table Context Menu==================================================================================
         ContextMenu tlTableContextMenu = new ContextMenu();
         tlTable.setContextMenu(tlTableContextMenu);
 
@@ -169,6 +168,35 @@ public class TaskListDashboard extends Scene {
         });
 
         tlTableContextMenu.getItems().addAll(showHideColumnsItem);
+
+        //Menu Bar======================================================================================================
+        MenuBar menuBar = new MenuBar();
+
+        Menu fileMenu = new Menu("File");
+        Menu newMenu  = new Menu("New");
+        MenuItem newTaskListMenuItem = new MenuItem("Task List...");
+        newMenu.getItems().addAll(newTaskListMenuItem);
+        fileMenu.getItems().addAll(newMenu);
+
+        menuBar.getMenus().add(fileMenu);
+
+        //Layout Grid Definition========================================================================================
+        layout.add(menuBar, 0, 0, 3, 1);
+
+        layout.add(actionListView, 0, 1);
+        layout.add(tlTable, 1, 1);
+        layout.add(tlListView, 2, 1);
+
+
+        //Column Constraints============================================================================================
+
+        ColumnConstraints column0 = new ColumnConstraints();
+        column0.setHgrow(Priority.SOMETIMES);
+        layout.getColumnConstraints().add(column0);
+
+        ColumnConstraints column1 = new ColumnConstraints();
+        column1.setHgrow(Priority.ALWAYS);
+        layout.getColumnConstraints().add(column1);
 
 
     }

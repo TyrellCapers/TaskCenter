@@ -1,10 +1,16 @@
 package com.mayubix.taskcenter;
 
+import com.dlsc.formsfx.model.structure.Field;
+import com.dlsc.formsfx.model.structure.Form;
+import com.dlsc.formsfx.model.structure.Group;
+import com.dlsc.formsfx.model.validators.StringLengthValidator;
+import com.dlsc.formsfx.view.renderer.FormRenderer;
+import com.mayubix.taskcenter.formmodels.LoginFormModel;
 import com.mayubix.taskcenter.scene.TaskListDashboard;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
-import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.*;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -23,6 +29,29 @@ public class HelloApplication extends Application {
         //timer.wait(5000);
         //stage.setScene(scene);
       //  stage.show();
+
+        LoginFormModel model = new LoginFormModel();
+
+
+        Form loginForm = Form.of(
+                Group.of(
+                        Field.ofStringType(model.usernameProperty())
+                                .label("Username")
+                                .validate(StringLengthValidator.upTo(20, "Only 20 characters allowed"))
+                                .span(5),
+                        Field.ofStringType(model.passwordProperty())
+                                .label("Password")
+                                .required("This field can't be empty")
+                                .span(5)
+                )
+        ).title("Login");
+
+        GridPane root = new GridPane();
+        root.add(new FormRenderer(loginForm), 0, 0);
+        ColumnConstraints column0 = new ColumnConstraints();
+        column0.setPercentWidth(30.0);
+        root.getColumnConstraints().add(column0);
+        Scene formScene = new Scene(root, 500, 500);
 
         TaskListDashboard scene = new TaskListDashboard(new AnchorPane(), 500, 500);
         stage.setTitle("Task List Dashboard");

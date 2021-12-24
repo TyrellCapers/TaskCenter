@@ -23,6 +23,7 @@ public class TaskList {
     private final String id;
     private final Long createTime;
     private ArrayList<Task> tasks;
+    private String name;
 
     public TaskList(String id, Long createTime){
         this.id = id;
@@ -58,6 +59,19 @@ public class TaskList {
         }
 
         return step;
+    }
+
+    @Override
+    public String toString(){
+        return this.name;
+    }
+
+    public void setName(String val){
+        this.name = val;
+    }
+
+    public String getName(){
+        return this.name;
     }
 
     public TaskNote findNoteById(Task task, String id){
