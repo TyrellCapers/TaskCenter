@@ -3,18 +3,24 @@ package com.mayubix.taskcenter.scene;
 import com.mayubix.taskcenter.api.Task;
 import com.mayubix.taskcenter.ui.TaskUI;
 import javafx.beans.property.Property;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.SceneAntialiasing;
-import javafx.scene.control.ListView;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Priority;
 import javafx.scene.paint.Paint;
+import javafx.stage.Stage;
+import org.controlsfx.control.tableview2.TableView2;
 
 public class TaskListDashboard extends Scene {
     private GridPane layout;
+    private TableView2 tlTable;
 
     private ListView<String> actionListView;
 
@@ -70,12 +76,22 @@ public class TaskListDashboard extends Scene {
     private void buildLayout(){
         //Action List View
         actionListView = new ListView<String>();
+        layout.add(actionListView, 0, 0);
+
+        ColumnConstraints column0 = new ColumnConstraints();
+        column0.setHgrow(Priority.SOMETIMES);
+        layout.getColumnConstraints().add(column0);
 
         actionListView.getItems().add("Sample Action");
 
         //Task List Table
-        TableView<Task> tlTable = new TableView<>();
-        layout.add(tlTable, 0, 0);
+        tlTable = new TableView2<>();
+        layout.add(tlTable, 1, 0);
+
+        ColumnConstraints column1 = new ColumnConstraints();
+        column1.setHgrow(Priority.ALWAYS);
+        layout.getColumnConstraints().add(column1);
+
 
         TableColumn taskIDCol = new TableColumn("Task ID");
         taskIDCol.setCellValueFactory(new PropertyValueFactory<TaskUI, String>("taskID"));
@@ -136,6 +152,23 @@ public class TaskListDashboard extends Scene {
         TableColumn createTimeCol = new TableColumn("Create Time");
         createTimeCol.setCellValueFactory(new PropertyValueFactory<TaskUI, String>("createTime"));
         tlTable.getColumns().add(createTimeCol);
+
+        //Task List Table Context Menu
+        ContextMenu tlTableContextMenu = new ContextMenu();
+        tlTable.setContextMenu(tlTableContextMenu);
+
+        MenuItem showHideColumnsItem = new MenuItem("Show/Hide Columns");
+        showHideColumnsItem.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent actionEvent) {
+                Stage eventStage = new Stage();
+                eventStage.setTitle("Show/Hide Columns");
+                eventStage.setScene(new VisibleColumnsPopup(new AnchorPane(), 300, 300, tlTable, eventStage));
+                eventStage.show();
+            }
+        });
+
+        tlTableContextMenu.getItems().addAll(showHideColumnsItem);
 
 
     }
