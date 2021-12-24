@@ -14,7 +14,7 @@ public class Task {
     public static final String OBJECT_NAME = "Task";
     public static final Long UPDATE_INTERVAL = 100L;
 
-    private static Integer s_objectCounter = 1;
+    public static Integer s_objectCounter = 1;
     private static final ScheduledThreadPoolExecutor s_updateWorkQueue = new ScheduledThreadPoolExecutor(THREAD_POOL_SIZE);
 
     private final String id;

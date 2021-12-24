@@ -230,6 +230,7 @@ public class TaskList {
     public static TaskList loadFromXML(String fileName){
         DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
         DocumentBuilder documentBuilder;
+        int taskObjectCount = 1;
 
         try{
             documentBuilder = documentBuilderFactory.newDocumentBuilder();
@@ -336,6 +337,9 @@ public class TaskList {
                         }
                     }
 
+                    String[] idTokens = task.getId().split(":");
+                    int taskIDNum = Integer.parseInt(idTokens[1]);
+                    Task.s_objectCounter = Integer.max(Task.s_objectCounter, taskIDNum);
                     taskList.getTasks().add(task);
 
                 }
