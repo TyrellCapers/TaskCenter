@@ -11,23 +11,28 @@ import javafx.scene.Scene;
 import javafx.scene.SceneAntialiasing;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.paint.Paint;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 import org.controlsfx.control.tableview2.TableView2;
-
 import java.util.ArrayList;
 
 public class TaskListDashboard extends Scene {
     private GridPane layout;
-    private TableView2 tlTable;
+    private TableView tlTable;
     private TaskList selectedTaskList;
     private ArrayList<TaskList> taskLists = new ArrayList<>();
     private ListView<TaskList> tlListView = new ListView<>();
     private ListView<String> actionListView = new ListView<>();
+    private Text selectedTaskListText;
+    private GridPane footerPane;
+    private Button executeActionBtn;
 
     public TaskListDashboard(Parent root){
         super(root);
@@ -79,14 +84,46 @@ public class TaskListDashboard extends Scene {
     }
 
     private void buildLayout(){
+        //Selected Task List Text=======================================================================================
+        selectedTaskListText = new Text();
+        selectedTaskListText.setText(selectedTaskList != null ? "Selected Task List: " + selectedTaskList.getName()
+                : "Selected Task List: N/A");
+
         //Task List List View===========================================================================================
+        tlListView.setOnMouseClicked(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent mouseEvent) {
+              selectedTaskList = tlListView.getSelectionModel().getSelectedItem();
+              if(selectedTaskList != null){
+                  selectedTaskListText.setText("Selected Task List: " + selectedTaskList.getName());
+              }
+              else{
+                  selectedTaskListText.setText("Selected Task List: N/A");
+              }
+            }
+        });
 
 
         //Action List View==============================================================================================
-        actionListView.getItems().add("Sample Action");
+        actionListView.getItems().add("Add Task");
+        actionListView.getItems().add("Remove Task");
+        actionListView.getItems().add("Test Action");
+
+        //Execute Action Button=========================================================================================
+        executeActionBtn = new Button("Execute Action");
+        executeActionBtn.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent actionEvent) {
+                String selectedAction = actionListView.getSelectionModel().getSelectedItem();
+                if(selectedAction != null){
+                    executeAction(selectedAction);
+                }
+            }
+        });
+
 
         //Task List Table===============================================================================================
-        tlTable = new TableView2<>();
+        tlTable = new TableView<TaskUI>();
 
 
 
@@ -180,15 +217,46 @@ public class TaskListDashboard extends Scene {
 
         menuBar.getMenus().add(fileMenu);
 
-        //Layout Grid Definition========================================================================================
+        //Menu Bar Actions==============================================================================================
+        newTaskListMenuItem.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent actionEvent) {
+               Stage eventStage = new Stage();
+               NewTaskListFormPopup formPopup = new NewTaskListFormPopup(new AnchorPane(), 300, 300, eventStage);
+               eventStage.setTitle(NewTaskListFormPopup.TITLE);
+               eventStage.setScene(formPopup);
+               eventStage.showAndWait();
+
+               if(formPopup.getRunTransaction()){
+                   tlListView.getItems().add(formPopup.getTaskList());
+               }
+
+            }
+        });
+
+        //Footer Layout Grid Definition=================================================================================
+        footerPane = new GridPane();
+        footerPane.add(selectedTaskListText, 0, 0);
+
+        //Footer Layout Column Constraints==============================================================================
+
+        //Footer Layout Row Constraints=================================================================================
+
+
+
+        //Main Layout Grid Definition===================================================================================
         layout.add(menuBar, 0, 0, 3, 1);
 
         layout.add(actionListView, 0, 1);
         layout.add(tlTable, 1, 1);
         layout.add(tlListView, 2, 1);
 
+        layout.add(executeActionBtn, 0, 2);
 
-        //Column Constraints============================================================================================
+        layout.add(footerPane, 0, 3);
+
+
+        //Main Layout Column Constraints================================================================================
 
         ColumnConstraints column0 = new ColumnConstraints();
         column0.setHgrow(Priority.SOMETIMES);
@@ -198,6 +266,40 @@ public class TaskListDashboard extends Scene {
         column1.setHgrow(Priority.ALWAYS);
         layout.getColumnConstraints().add(column1);
 
+        //Main Layout Row Constraints===================================================================================
 
+
+
+    }
+
+    private void executeAction(String actionName){
+        Stage actionStage;
+        switch(actionName){
+            case "Add Task":
+                actionStage = new Stage();
+                AddTaskPopup addTaskPopup = new AddTaskPopup(new AnchorPane(), 500, 500, actionStage);
+                actionStage.setTitle(AddTaskPopup.TITLE);
+                actionStage.setScene(addTaskPopup);
+                actionStage.showAndWait();
+
+                if(addTaskPopup.getRunTransaction() && selectedTaskList != null){
+                    selectedTaskList.getTasks().add(addTaskPopup.getNewTask());
+                    refreshTaskTable();
+                }
+            case "Test Action" :
+                System.out.println("Test Action Executed...");
+                break;
+            default :
+                break;
+        }
+    }
+
+    private void refreshTaskTable(){
+        if(selectedTaskList != null){
+            tlTable.getItems().clear();
+            for(Task t : selectedTaskList.getTasks()){
+                tlTable.getItems().add(new TaskUI(t));
+            }
+        }
     }
 }

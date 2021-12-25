@@ -3,9 +3,11 @@ package com.mayubix.taskcenter.scene;
 import com.dlsc.formsfx.model.structure.Field;
 import com.dlsc.formsfx.model.structure.Form;
 import com.dlsc.formsfx.model.structure.Group;
+import com.dlsc.formsfx.model.structure.SingleSelectionField;
 import com.dlsc.formsfx.view.renderer.FormRenderer;
-import com.mayubix.taskcenter.api.TaskList;
-import com.mayubix.taskcenter.formmodels.NewTaskListFormModel;
+import com.mayubix.taskcenter.api.Task;
+import com.mayubix.taskcenter.api.TaskStatus;
+import com.mayubix.taskcenter.formmodels.AddTaskFormModel;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Parent;
@@ -15,27 +17,24 @@ import javafx.scene.control.Button;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Paint;
 import javafx.stage.Stage;
-import org.w3c.dom.events.Event;
 
-import java.util.ArrayList;
+public class AddTaskPopup extends Scene {
+    public static final String TITLE = "Add Task...";
 
-public class NewTaskListFormPopup extends Scene {
+    private GridPane layout;
+    private Stage stage;
 
-    public static final String TITLE = "New Task List...";
-
-    private GridPane layout = new GridPane();
     private Form form;
     private Button okBtn;
     private Button cancelBtn;
-
-    private ArrayList<Field> fields = new ArrayList<>();
-    private NewTaskListFormModel model = new NewTaskListFormModel();
-    private TaskList taskList;
-    private Stage stage;
+    private AddTaskFormModel model;
     private Boolean runTransaction;
 
-    public NewTaskListFormPopup(Parent root, Stage stage){
+    private Task newTask;
+
+    public AddTaskPopup(Parent root, Stage stage){
         super(root);
+        layout = new GridPane();
         this.setRoot(layout);
         this.stage = stage;
         initialize();
@@ -43,16 +42,18 @@ public class NewTaskListFormPopup extends Scene {
 
     }
 
-    public NewTaskListFormPopup(Parent root, double width, double height, Stage stage){
+    public AddTaskPopup(Parent root, double width, double height, Stage stage){
         super(root, width, height);
+        layout = new GridPane();
         this.setRoot(layout);
         this.stage = stage;
         initialize();
         buildLayout();
     }
 
-    public NewTaskListFormPopup(Parent root, double width, double height, boolean depthBuffer, Stage stage) {
+    public AddTaskPopup(Parent root, double width, double height, boolean depthBuffer, Stage stage) {
         super(root, width, height, depthBuffer);
+        layout = new GridPane();
         this.setRoot(layout);
         this.stage = stage;
         initialize();
@@ -60,8 +61,9 @@ public class NewTaskListFormPopup extends Scene {
 
     }
 
-    public NewTaskListFormPopup(Parent root, double width, double height, boolean depthBuffer, SceneAntialiasing antiAliasing, Stage stage){
+    public AddTaskPopup(Parent root, double width, double height, boolean depthBuffer, SceneAntialiasing antiAliasing, Stage stage){
         super(root, width, height, depthBuffer, antiAliasing);
+        layout = new GridPane();
         this.setRoot(layout);
         this.stage = stage;
         initialize();
@@ -69,8 +71,9 @@ public class NewTaskListFormPopup extends Scene {
 
     }
 
-    public NewTaskListFormPopup(Parent root, double width, double height, Paint fill, Stage stage){
+    public AddTaskPopup(Parent root, double width, double height, Paint fill, Stage stage){
         super(root, width, height, fill);
+        layout = new GridPane();
         this.setRoot(layout);
         this.stage = stage;
         initialize();
@@ -78,8 +81,9 @@ public class NewTaskListFormPopup extends Scene {
 
     }
 
-    public NewTaskListFormPopup(Parent root, Paint fill, Stage stage){
+    public AddTaskPopup(Parent root, Paint fill, Stage stage){
         super(root, fill);
+        layout = new GridPane();
         this.setRoot(layout);
         this.stage = stage;
         initialize();
@@ -88,11 +92,28 @@ public class NewTaskListFormPopup extends Scene {
     }
 
     private void initialize(){
+        //Run Transaction===============================================================================================
+        runTransaction = false;
+
         //Form==========================================================================================================
+        model = new AddTaskFormModel();
+
         form = Form.of(
                 Group.of(
                         Field.ofStringType(model.nameProperty())
-                                .label("Name:")
+                                .label("Name: "),
+                        Field.ofStringType(model.descriptionProperty())
+                                .label("Description: "),
+                        Field.ofDate(model.targetDate())
+                                .label("Target Date: "),
+                        Field.ofIntegerType(model.sizeProperty())
+                                .label("Size: "),
+                        Field.ofIntegerType(model.priorityProperty())
+                                .label("Priority: "),
+                        Field.ofSingleSelectionType(model.statusList())
+                                .label("Status: "),
+                        Field.ofStringType(model.categoryProperty())
+                                .label("Category: ")
                 )
         );
 
@@ -101,13 +122,25 @@ public class NewTaskListFormPopup extends Scene {
         okBtn.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {
-                taskList = new TaskList();
+                newTask = new Task();
+                SingleSelectionField<String> statusField = null;
 
                 for(Field f : form.getFields()){
                     f.persist();
+                    if(f.getLabel().equals("Status: ")){
+                        statusField = (SingleSelectionField<String>) f;
+                    }
                 }
 
-                taskList.setName(model.nameProperty().get());
+                newTask.setName(model.nameProperty().get());
+                newTask.setDescription(model.descriptionProperty().get());
+                newTask.setTargetDate(model.targetDate().toEpochDay());
+                newTask.setSize(model.sizeProperty().getValue().shortValue());
+                newTask.setPriority(model.priorityProperty().getValue().shortValue());
+                newTask.setStatus(new TaskStatus(newTask));
+                newTask.getStatus().parseTaskStatusValue(statusField.getSelection());
+                newTask.getCategory().setName(model.categoryProperty().get());
+
                 runTransaction = true;
                 stage.close();
             }
@@ -122,10 +155,6 @@ public class NewTaskListFormPopup extends Scene {
                 stage.close();
             }
         });
-
-        //Run Transaction===============================================================================================
-        runTransaction = false;
-
     }
 
     private void buildLayout(){
@@ -139,11 +168,11 @@ public class NewTaskListFormPopup extends Scene {
 
     }
 
-    public TaskList getTaskList(){
-        return this.taskList;
+    public Task getNewTask(){
+        return this.newTask;
     }
 
     public Boolean getRunTransaction(){
-        return runTransaction;
+        return this.runTransaction;
     }
 }

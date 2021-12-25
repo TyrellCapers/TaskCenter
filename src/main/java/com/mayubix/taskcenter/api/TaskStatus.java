@@ -111,4 +111,14 @@ public class TaskStatus {
             default          -> "Unknown Status";
         };
     }
+
+    public static String parseTaskStatusString(TaskStatusValue val){
+        return switch(val){
+            case NOT_STARTED -> "Not Started";
+            case PENDING     -> "Pending";
+            case COMPLETED   -> "Completed";
+            case WORKING     -> "Working";
+            case IDLE        -> "Idle";
+        };
+    }
 }

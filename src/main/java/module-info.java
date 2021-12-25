@@ -12,4 +12,6 @@ module com.mayubix.taskcenter {
 
     opens com.mayubix.taskcenter to javafx.fxml;
     exports com.mayubix.taskcenter;
+
+    opens com.mayubix.taskcenter.ui to javafx.base;
 }

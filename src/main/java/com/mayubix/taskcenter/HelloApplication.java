@@ -14,6 +14,7 @@ import javafx.scene.layout.*;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.Timer;
 
 public class HelloApplication extends Application {
@@ -38,11 +39,13 @@ public class HelloApplication extends Application {
                         Field.ofStringType(model.usernameProperty())
                                 .label("Username")
                                 .validate(StringLengthValidator.upTo(20, "Only 20 characters allowed"))
-                                .span(5),
+                                ,
                         Field.ofStringType(model.passwordProperty())
                                 .label("Password")
                                 .required("This field can't be empty")
-                                .span(5)
+                                ,
+                        Field.ofDate(LocalDate.now())
+                                .label("Date Field")
                 )
         ).title("Login");
 

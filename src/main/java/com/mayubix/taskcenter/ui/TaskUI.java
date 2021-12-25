@@ -3,23 +3,24 @@ package com.mayubix.taskcenter.ui;
 import com.mayubix.taskcenter.TimeFormatter;
 import com.mayubix.taskcenter.api.Task;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 
 public class TaskUI {
-    private SimpleStringProperty taskID;
-    private SimpleStringProperty name;
-    private SimpleStringProperty description;
-    private SimpleStringProperty targetDate;
-    private SimpleStringProperty timeElapsed;
-    private SimpleStringProperty timeWorked;
-    private SimpleStringProperty completionDate;
-    private SimpleStringProperty timePassedTargetDate;
-    private SimpleStringProperty currentStep;
-    private SimpleStringProperty size;
-    private SimpleStringProperty priority;
-    private SimpleStringProperty status;
-    private SimpleStringProperty timePending;
-    private SimpleStringProperty category;
-    private SimpleStringProperty createTime;
+    private final StringProperty taskID;
+    private final StringProperty name;
+    private final StringProperty description;
+    private final StringProperty targetDate;
+    private final StringProperty timeElapsed;
+    private final StringProperty timeWorked;
+    private final StringProperty completionDate;
+    private final StringProperty timePassedTargetDate;
+    private final StringProperty currentStep;
+    private final StringProperty size;
+    private final StringProperty priority;
+    private final StringProperty status;
+    private final StringProperty timePending;
+    private final StringProperty category;
+    private final StringProperty createTime;
 
     public TaskUI(){
         this.taskID = new SimpleStringProperty();
@@ -48,7 +49,7 @@ public class TaskUI {
         this.timeWorked = new SimpleStringProperty(TimeFormatter.timerFormat(task.getTimeWorked()));
         this.completionDate = new SimpleStringProperty(TimeFormatter.dateFormat(task.getCompletionDate()));
         this.timePassedTargetDate = new SimpleStringProperty(TimeFormatter.timerFormat(task.getTimePassedTargetDate()));
-        this.currentStep = new SimpleStringProperty(task.getCurrentStep().toString());
+        this.currentStep = new SimpleStringProperty(task.getCurrentStep() != null ? task.getCurrentStep().toString() : "N/A");
         this.size = new SimpleStringProperty(task.getSize().toString());
         this.priority = new SimpleStringProperty(task.getPriority().toString());
         this.status = new SimpleStringProperty(task.getStatus().toString());
@@ -65,12 +66,20 @@ public class TaskUI {
         this.taskID.set(val);
     }
 
+    public StringProperty taskIDProperty(){
+        return this.taskID;
+    }
+
     public String getName(){
         return this.name.get();
     }
 
     public void setName(String val){
         this.name.set(val);
+    }
+
+    public StringProperty nameProperty(){
+        return this.name;
     }
 
     public String getDescription(){
@@ -81,12 +90,20 @@ public class TaskUI {
         this.description.set(val);
     }
 
+    public StringProperty descriptionProperty(){
+        return this.description;
+    }
+
     public String getTargetDate(){
         return this.targetDate.get();
     }
 
     public void setTargetDate(String val){
         this.targetDate.set(val);
+    }
+
+    public StringProperty targetDateProperty(){
+        return this.targetDate;
     }
 
     public String getTimeElapsed(){
@@ -97,12 +114,20 @@ public class TaskUI {
         this.timeElapsed.set(val);
     }
 
+    public StringProperty timeElapsedProperty(){
+        return this.timeElapsed;
+    }
+
     public String getTimeWorked(){
         return this.timeWorked.get();
     }
 
     public void setTimeWorked(String val){
         this.timeWorked.set(val);
+    }
+
+    public StringProperty timeWorkedProperty(){
+        return this.timeWorked;
     }
 
     public String getCompletionDate(){
@@ -113,12 +138,20 @@ public class TaskUI {
         this.completionDate.set(val);
     }
 
+    public StringProperty completionDateProperty(){
+        return this.completionDate;
+    }
+
     public String getTimePassedTargetDate(){
         return this.timePassedTargetDate.get();
     }
 
     public void setTimePassedTargetDate(String val){
         this.timePassedTargetDate.set(val);
+    }
+
+    public StringProperty timePassedTargetDateProperty(){
+        return timePassedTargetDate;
     }
 
     public String getCurrentStep(){
@@ -129,12 +162,20 @@ public class TaskUI {
         this.currentStep.set(val);
     }
 
+    public StringProperty currentStepProperty(){
+        return this.currentStep;
+    }
+
     public String getSize(){
         return this.size.get();
     }
 
     public void setSize(String val){
         this.size.set(val);
+    }
+
+    public StringProperty sizeProperty(){
+        return this.size;
     }
 
     public String getPriority(){
@@ -145,12 +186,20 @@ public class TaskUI {
         this.priority.set(val);
     }
 
+    public StringProperty priorityProperty(){
+        return this.priority;
+    }
+
     public String getStatus(){
         return this.status.get();
     }
 
     public void setStatus(String val){
         this.status.set(val);
+    }
+
+    public StringProperty statusProperty(){
+        return this.status;
     }
 
     public String getTimePending(){
@@ -161,6 +210,10 @@ public class TaskUI {
         this.timePending.set(val);
     }
 
+    public StringProperty timePendingProperty(){
+        return this.timePending;
+    }
+
     public String getCategory(){
         return this.category.get();
     }
@@ -169,12 +222,20 @@ public class TaskUI {
         this.category.set(val);
     }
 
+    public StringProperty categoryProperty(){
+        return this.category;
+    }
+
     public String getCreateTime(){
         return this.createTime.get();
     }
 
     public void setCreateTime(String val){
         this.createTime.set(val);
+    }
+
+    public StringProperty createTimeProperty(){
+        return this.createTimeProperty();
     }
 
 
