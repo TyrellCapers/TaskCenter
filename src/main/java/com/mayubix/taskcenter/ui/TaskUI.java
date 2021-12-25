@@ -5,7 +5,16 @@ import com.mayubix.taskcenter.api.Task;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+
 public class TaskUI {
+
+    public static final Integer                      THREAD_POOL_SIZE = 10;
+    public static final Long                         UPDATE_INTERVAL  = 200L;
+    private static final ScheduledThreadPoolExecutor s_updateWorkQueue = new ScheduledThreadPoolExecutor(THREAD_POOL_SIZE);
+
     private final StringProperty taskID;
     private final StringProperty name;
     private final StringProperty description;
@@ -21,6 +30,7 @@ public class TaskUI {
     private final StringProperty timePending;
     private final StringProperty category;
     private final StringProperty createTime;
+    private final ScheduledFuture<?> future;
 
     private Task task;
 
@@ -40,6 +50,8 @@ public class TaskUI {
         this.timePending = new SimpleStringProperty();
         this.category = new SimpleStringProperty();
         this.createTime = new SimpleStringProperty();
+
+        this.future = s_updateWorkQueue.scheduleWithFixedDelay(new TaskUIUpdateLoop(this,  UPDATE_INTERVAL), UPDATE_INTERVAL, UPDATE_INTERVAL, TimeUnit.MILLISECONDS);
     }
 
     public TaskUI(Task task){
@@ -60,6 +72,7 @@ public class TaskUI {
         this.createTime = new SimpleStringProperty(TimeFormatter.dateFormat(task.getCreateTime()));
 
         this.task = task;
+        this.future = s_updateWorkQueue.scheduleWithFixedDelay(new TaskUIUpdateLoop(this,  UPDATE_INTERVAL), UPDATE_INTERVAL, UPDATE_INTERVAL, TimeUnit.MILLISECONDS);
     }
 
     public void setTask(Task task){
@@ -266,6 +279,11 @@ public class TaskUI {
         this.setTimePending(TimeFormatter.timerFormat(task.getTimePending()));
         this.setCategory(task.getCategory().toString());
         this.setCreateTime(TimeFormatter.dateFormat(task.getCreateTime()));
+    }
+
+    public void clean(){
+        this.task = null;
+        this.future.cancel(true);
     }
 
 
