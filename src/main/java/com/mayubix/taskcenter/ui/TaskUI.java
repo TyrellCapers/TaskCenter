@@ -22,6 +22,8 @@ public class TaskUI {
     private final StringProperty category;
     private final StringProperty createTime;
 
+    private Task task;
+
     public TaskUI(){
         this.taskID = new SimpleStringProperty();
         this.name = new SimpleStringProperty();
@@ -56,6 +58,16 @@ public class TaskUI {
         this.timePending = new SimpleStringProperty(TimeFormatter.timerFormat(task.getTimePending()));
         this.category = new SimpleStringProperty(task.getCategory().toString());
         this.createTime = new SimpleStringProperty(TimeFormatter.dateFormat(task.getCreateTime()));
+
+        this.task = task;
+    }
+
+    public void setTask(Task task){
+        this.task = task;
+    }
+
+    public Task getTask(){
+        return this.task;
     }
 
     public String getTaskID(){
@@ -235,7 +247,25 @@ public class TaskUI {
     }
 
     public StringProperty createTimeProperty(){
-        return this.createTimeProperty();
+        return this.createTime;
+    }
+
+    public void refresh(){
+        this.setTaskID(task.getId());
+        this.setName(task.getName());
+        this.setDescription(task.getDescription());
+        this.setTargetDate(TimeFormatter.dateFormat(task.getTargetDate()));
+        this.setTimeElapsed(TimeFormatter.timerFormat(task.getTimeElapsed()));
+        this.setTimeWorked(TimeFormatter.timerFormat(task.getTimeWorked()));
+        this.setCompletionDate(TimeFormatter.dateFormat(task.getCompletionDate()));
+        this.setTimePassedTargetDate(TimeFormatter.timerFormat(task.getTimePassedTargetDate()));
+        this.setCurrentStep(task.getCurrentStep() != null ? task.getCurrentStep().toString() : "N/A");
+        this.setSize(task.getSize().toString());
+        this.setPriority(task.getPriority().toString());
+        this.setStatus(task.getStatus().toString());
+        this.setTimePending(TimeFormatter.timerFormat(task.getTimePending()));
+        this.setCategory(task.getCategory().toString());
+        this.setCreateTime(TimeFormatter.dateFormat(task.getCreateTime()));
     }
 
 
