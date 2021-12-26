@@ -1,7 +1,11 @@
 package com.mayubix.taskcenter.api;
 
 import com.mayubix.taskcenter.updateloops.TaskUpdateLoop;
+
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -245,6 +249,15 @@ public class Task {
 
     public void setTargetDate(Long targetDate) {
         this.targetDate = targetDate;
+    }
+
+    public void setTargetDate(LocalDate targetDate){
+        try {
+            this.targetDate = new SimpleDateFormat("yyyy-MM-dd").parse(targetDate.toString()).getTime();
+        }
+        catch(Exception e){
+            e.printStackTrace(System.out);
+        }
     }
 
     public Long getTimeElapsed() {

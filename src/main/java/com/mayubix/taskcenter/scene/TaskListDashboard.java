@@ -286,6 +286,16 @@ public class TaskListDashboard extends Scene {
                     selectedTaskList.getTasks().add(addTaskPopup.getNewTask());
                     refreshTaskTable();
                 }
+
+                break;
+            case "Remove Task" :
+                TaskUI selectedTaskUI = (TaskUI) tlTable.getSelectionModel().getSelectedItem();
+                if(selectedTaskUI != null && selectedTaskList != null){
+                    selectedTaskList.removeTask(selectedTaskUI.getTask());
+                    selectedTaskUI.clean();
+                    refreshTaskTable();
+                }
+                break;
             case "Test Action" :
                 System.out.println("Test Action Executed...");
                 break;

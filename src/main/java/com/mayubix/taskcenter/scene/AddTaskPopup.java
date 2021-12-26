@@ -18,6 +18,10 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Paint;
 import javafx.stage.Stage;
 
+import java.time.LocalDate;
+import java.time.temporal.ChronoField;
+import java.time.temporal.ChronoUnit;
+
 public class AddTaskPopup extends Scene {
     public static final String TITLE = "Add Task...";
 
@@ -134,7 +138,8 @@ public class AddTaskPopup extends Scene {
 
                 newTask.setName(model.nameProperty().get());
                 newTask.setDescription(model.descriptionProperty().get());
-                newTask.setTargetDate(model.targetDate().toEpochDay());
+                newTask.setTargetDate(model.targetDate());
+                System.out.println("Target Date Value: " + newTask.getTargetDate());
                 newTask.setSize(model.sizeProperty().getValue().shortValue());
                 newTask.setPriority(model.priorityProperty().getValue().shortValue());
                 newTask.setStatus(new TaskStatus(newTask));
@@ -161,7 +166,7 @@ public class AddTaskPopup extends Scene {
         //Grid Setup====================================================================================================
         layout.add(new FormRenderer(form), 0, 0);
         layout.add(cancelBtn,0, 1);
-        layout.add(okBtn, 0, 2);
+        layout.add(okBtn, 1, 1);
 
         //Column Constraints============================================================================================
 

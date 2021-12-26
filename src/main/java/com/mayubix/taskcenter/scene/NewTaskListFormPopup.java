@@ -132,7 +132,7 @@ public class NewTaskListFormPopup extends Scene {
         //Grid Setup====================================================================================================
         layout.add(new FormRenderer(form), 0, 0);
         layout.add(cancelBtn,0, 1);
-        layout.add(okBtn, 0, 2);
+        layout.add(okBtn, 1,1);
 
         //Column Constraints============================================================================================
 

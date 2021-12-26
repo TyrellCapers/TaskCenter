@@ -8,10 +8,12 @@ import com.dlsc.formsfx.view.renderer.FormRenderer;
 import com.mayubix.taskcenter.formmodels.LoginFormModel;
 import com.mayubix.taskcenter.scene.TaskListDashboard;
 import javafx.application.Application;
+import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -59,6 +61,12 @@ public class HelloApplication extends Application {
         TaskListDashboard scene = new TaskListDashboard(new AnchorPane(), 500, 500);
         stage.setTitle("Task List Dashboard");
         stage.setScene(scene);
+        stage.setOnCloseRequest(new EventHandler<WindowEvent>() {
+            @Override
+            public void handle(WindowEvent windowEvent) {
+              System.exit(0);
+            }
+        });
         stage.show();
     }
 
