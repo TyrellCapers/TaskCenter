@@ -266,7 +266,7 @@ public class TaskList {
                     task.setTargetDate(Long.parseLong(taskElement.getAttribute("targetDate")));
                     task.setTimeElapsed(Long.parseLong(taskElement.getAttribute("timeElapsed")));
                     task.setTimeWorked(Long.parseLong(taskElement.getAttribute("timeWorked")));
-                    task.setCompletionDate(Long.parseLong(taskElement.getAttribute("completionDate")));
+                    task.setCompletionDate(!taskElement.getAttribute("completionDate").equals("") ? Long.parseLong(taskElement.getAttribute("completionDate")) : null);
                     task.setTimePassedTargetDate(Long.parseLong(taskElement.getAttribute("timePassedTargetDate")));
 
 
