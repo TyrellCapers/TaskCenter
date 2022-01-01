@@ -253,7 +253,7 @@ public class TaskList {
             Element taskListElement = (Element) doc.getElementsByTagName(TaskList.OBJECT_NAME).item(0);
 
             TaskList taskList = new TaskList(taskListElement.getAttribute("id"), Long.parseLong(taskListElement.getAttribute("createTime")));
-
+            taskList.setName(taskListElement.getAttribute("name"));
             NodeList taskElements = taskListElement.getElementsByTagName(Task.OBJECT_NAME);
             for(int i = 0; i < taskElements.getLength(); i++){
                 Node taskNode = taskElements.item(i);
@@ -269,7 +269,9 @@ public class TaskList {
                     task.setCompletionDate(Long.parseLong(taskElement.getAttribute("completionDate")));
                     task.setTimePassedTargetDate(Long.parseLong(taskElement.getAttribute("timePassedTargetDate")));
 
+
                     //Create task steps
+                    String currentStepId = taskElement.getAttribute("currentStep");
                     NodeList stepElements = taskElement.getElementsByTagName(TaskStep.OBJECT_NAME);
                     for(int j = 0; j < stepElements.getLength(); j++){
                         Node stepNode = stepElements.item(j);
@@ -279,7 +281,11 @@ public class TaskList {
                             TaskStep loadedStep = task.createTaskStep(stepElement.getAttribute("id"), stepElement.getAttribute("name"),
                                     stepElement.getAttribute("description"), Long.parseLong(stepElement.getAttribute("createTime")));
 
-                            loadedStep.parseStatusString(stepElement.getAttribute("createTime"));
+                            loadedStep.parseStatusString(stepElement.getAttribute("statusValue"));
+
+                            if(loadedStep.getId().equals(currentStepId)){
+                                task.setCurrentStep(loadedStep);
+                            }
 
                         }
                     }
@@ -310,6 +316,7 @@ public class TaskList {
                     TaskStatus status = new TaskStatus(taskStatusElement.getAttribute("id"),
                             Long.parseLong(taskStatusElement.getAttribute("createTime")),
                             task, taskStatusElement.getAttribute("status"));
+                    task.setStatus(status);
 
                     //Initialize task tags
                     NodeList tagElements = taskElement.getElementsByTagName(TaskTag.OBJECT_NAME);
@@ -333,6 +340,7 @@ public class TaskList {
                             Long.parseLong(taskCategoryElement.getAttribute("createTime")), task);
 
                     loadedCategory.setName(taskCategoryElement.getAttribute("name"));
+                    task.setCategory(loadedCategory);
 
                     //Initialize Task History Items
                     NodeList historyElements = taskElement.getElementsByTagName(TaskHistoryItem.OBJECT_NAME);
@@ -354,7 +362,9 @@ public class TaskList {
                     String[] idTokens = task.getId().split(":");
                     int taskIDNum = Integer.parseInt(idTokens[1]);
                     Task.s_objectCounter = Integer.max(Task.s_objectCounter, taskIDNum);
+                    System.out.println("S Object Counter: " + Task.s_objectCounter);
                     taskList.getTasks().add(task);
+                    System.out.println("Task List Size: " + taskList.getTasks().size());
 
                 }
             }
@@ -377,6 +387,7 @@ public class TaskList {
             Element rootElement = doc.createElement(TaskList.OBJECT_NAME);
             rootElement.setAttribute("id", this.getId());
             rootElement.setAttribute("createTime", this.getCreateTime().toString());
+            rootElement.setAttribute("name", this.getName());
             doc.appendChild(rootElement);
 
             //Create the underlying Task Elements
@@ -388,7 +399,7 @@ public class TaskList {
                 taskElement.setAttribute("targetDate", task.getTargetDate().toString());
                 taskElement.setAttribute("timeElapsed", task.getTimeElapsed().toString());
                 taskElement.setAttribute("timeWorked", task.getTimeWorked().toString());
-                taskElement.setAttribute("completionDate", task.getCompletionDate().toString());
+                taskElement.setAttribute("completionDate", task.getCompletionDate() != null ? task.getCompletionDate().toString() : "");
                 taskElement.setAttribute("timePassedTargetDate", task.getTimePassedTargetDate().toString());
                 taskElement.setAttribute("currentStep", task.getCurrentStep() != null ? task.getCurrentStep().getId() : "null");
                 taskElement.setAttribute("size", task.getSize().toString());
@@ -479,5 +490,6 @@ public class TaskList {
             e.printStackTrace(System.out);
         }
     }
+
 
 }

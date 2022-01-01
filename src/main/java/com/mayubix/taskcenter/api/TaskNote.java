@@ -68,4 +68,9 @@ public class TaskNote {
     public void setTask(Task task) {
         this.task = task;
     }
+
+    @Override
+    public String toString(){
+        return this.name;
+    }
 }

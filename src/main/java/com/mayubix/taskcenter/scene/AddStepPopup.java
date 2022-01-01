@@ -5,10 +5,11 @@ import com.dlsc.formsfx.model.structure.Form;
 import com.dlsc.formsfx.model.structure.Group;
 import com.dlsc.formsfx.model.structure.SingleSelectionField;
 import com.dlsc.formsfx.view.renderer.FormRenderer;
-import com.mayubix.taskcenter.TimeFormatter;
 import com.mayubix.taskcenter.api.Task;
-import com.mayubix.taskcenter.api.TaskStatus;
-import com.mayubix.taskcenter.formmodels.AddTaskFormModel;
+import com.mayubix.taskcenter.api.TaskList;
+import com.mayubix.taskcenter.api.TaskStep;
+import com.mayubix.taskcenter.api.TaskStepStatusValue;
+import com.mayubix.taskcenter.formmodels.AddStepFormModel;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Parent;
@@ -19,12 +20,8 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Paint;
 import javafx.stage.Stage;
 
-import java.time.LocalDate;
-import java.time.temporal.ChronoField;
-import java.time.temporal.ChronoUnit;
-
-public class AddTaskPopup extends Scene {
-    public static final String TITLE = "Add Task...";
+public class AddStepPopup extends Scene {
+    public static final String TITLE = "Add Step...";
 
     private GridPane layout;
     private Stage stage;
@@ -32,13 +29,15 @@ public class AddTaskPopup extends Scene {
     private Form form;
     private Button okBtn;
     private Button cancelBtn;
-    private AddTaskFormModel model;
+    private AddStepFormModel model;
     private Boolean runTransaction;
 
-    private Task newTask;
+    private TaskList taskList;
+    private TaskStep newStep;
 
-    public AddTaskPopup(Parent root, Stage stage){
+    public AddStepPopup(Parent root, Stage stage, TaskList taskList){
         super(root);
+        this.taskList = taskList;
         layout = new GridPane();
         this.setRoot(layout);
         this.stage = stage;
@@ -47,8 +46,9 @@ public class AddTaskPopup extends Scene {
 
     }
 
-    public AddTaskPopup(Parent root, double width, double height, Stage stage){
+    public AddStepPopup(Parent root, double width, double height, Stage stage, TaskList taskList){
         super(root, width, height);
+        this.taskList = taskList;
         layout = new GridPane();
         this.setRoot(layout);
         this.stage = stage;
@@ -56,8 +56,9 @@ public class AddTaskPopup extends Scene {
         buildLayout();
     }
 
-    public AddTaskPopup(Parent root, double width, double height, boolean depthBuffer, Stage stage) {
+    public AddStepPopup(Parent root, double width, double height, boolean depthBuffer, Stage stage, TaskList taskList) {
         super(root, width, height, depthBuffer);
+        this.taskList = taskList;
         layout = new GridPane();
         this.setRoot(layout);
         this.stage = stage;
@@ -66,8 +67,9 @@ public class AddTaskPopup extends Scene {
 
     }
 
-    public AddTaskPopup(Parent root, double width, double height, boolean depthBuffer, SceneAntialiasing antiAliasing, Stage stage){
+    public AddStepPopup(Parent root, double width, double height, boolean depthBuffer, SceneAntialiasing antiAliasing, Stage stage, TaskList taskList){
         super(root, width, height, depthBuffer, antiAliasing);
+        this.taskList = taskList;
         layout = new GridPane();
         this.setRoot(layout);
         this.stage = stage;
@@ -76,8 +78,9 @@ public class AddTaskPopup extends Scene {
 
     }
 
-    public AddTaskPopup(Parent root, double width, double height, Paint fill, Stage stage){
+    public AddStepPopup(Parent root, double width, double height, Paint fill, Stage stage, TaskList taskList){
         super(root, width, height, fill);
+        this.taskList = taskList;
         layout = new GridPane();
         this.setRoot(layout);
         this.stage = stage;
@@ -86,8 +89,9 @@ public class AddTaskPopup extends Scene {
 
     }
 
-    public AddTaskPopup(Parent root, Paint fill, Stage stage){
+    public AddStepPopup(Parent root, Paint fill, Stage stage, TaskList taskList){
         super(root, fill);
+        this.taskList = taskList;
         layout = new GridPane();
         this.setRoot(layout);
         this.stage = stage;
@@ -98,56 +102,51 @@ public class AddTaskPopup extends Scene {
 
     private void initialize(){
         //Run Transaction===============================================================================================
-        runTransaction = false;
+        this.runTransaction = false;
 
         //Form==========================================================================================================
-        model = new AddTaskFormModel();
+        model = new AddStepFormModel(this.taskList);
 
         form = Form.of(
                 Group.of(
                         Field.ofStringType(model.nameProperty())
-                                .label("Name: "),
+                            .label("Name"),
                         Field.ofStringType(model.descriptionProperty())
-                                .label("Description: "),
-                        Field.ofDate(model.targetDateProperty())
-                                .label("Target Date: "),
-                        Field.ofIntegerType(model.sizeProperty())
-                                .label("Size: "),
-                        Field.ofIntegerType(model.priorityProperty())
-                                .label("Priority: "),
-                        Field.ofSingleSelectionType(model.statusList())
-                                .label("Status: "),
-                        Field.ofStringType(model.categoryProperty())
-                                .label("Category: ")
+                            .label("Description"),
+                        Field.ofSingleSelectionType(model.taskList())
+                            .label("Task")
                 )
         );
 
-        //OK Button=====================================================================================================
+        //OK Btn========================================================================================================
         okBtn = new Button("OK");
         okBtn.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {
-                newTask = new Task();
-                SingleSelectionField<String> statusField = null;
+                Task selectedTask = null;
+                String selectedStatus = null;
 
                 for(Field f : form.getFields()){
                     f.persist();
-                    if(f.getLabel().equals("Status: ")){
-                        statusField = (SingleSelectionField<String>) f;
+                    if(f.getLabel().equals("Task")){
+                        selectedTask = ((SingleSelectionField<Task>) f).getSelection();
                     }
+
                 }
 
-                newTask.setName(model.nameProperty().get());
-                newTask.setDescription(model.descriptionProperty().get());
-                newTask.setTargetDate(model.targetDateProperty().get());
-                newTask.setSize(model.sizeProperty().getValue().shortValue());
-                newTask.setPriority(model.priorityProperty().getValue().shortValue());
-                newTask.setStatus(new TaskStatus(newTask));
-                newTask.getStatus().parseTaskStatusValue(statusField.getSelection());
-                newTask.getCategory().setName(model.categoryProperty().get());
 
-                runTransaction = true;
+                if(selectedTask != null) {
+                    selectedTask.createTaskStep(model.nameProperty().get(), model.descriptionProperty().get());
+                  //  newStep = new TaskStep(selectedTask);
+                  //  newStep.setName(model.nameProperty().get());
+                  //  newStep.setDescription(model.descriptionProperty().get());
+                  //  newStep.setStatusValue(TaskStepStatusValue.valueOf(selectedStatus.toUpperCase()));
+
+                    runTransaction = true;
+                }
+
                 stage.close();
+
             }
         });
 
@@ -169,15 +168,14 @@ public class AddTaskPopup extends Scene {
         layout.add(okBtn, 1, 1);
 
         //Column Constraints============================================================================================
-
-
     }
 
-    public Task getNewTask(){
-        return this.newTask;
+    public TaskStep getNewStep(){
+        return this.newStep;
     }
 
     public Boolean getRunTransaction(){
         return this.runTransaction;
     }
+
 }

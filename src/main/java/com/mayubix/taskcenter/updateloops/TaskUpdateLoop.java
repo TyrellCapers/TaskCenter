@@ -28,7 +28,7 @@ public class TaskUpdateLoop implements Runnable {
             task.setTimeWorked(task.getTimeWorked() + updateInterval);
             task.setTimePending(0L);
         }
-        else{
+        else if(task.getStatus().getStatus() != TaskStatusValue.IDLE){
             task.setTimePending(0L);
         }
 

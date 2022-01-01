@@ -87,6 +87,12 @@ public class TaskStatus {
         if(origValue != this.status){
             task.createHistoryItem("Status Changed", "Task status changed to " + this.status, System.currentTimeMillis());
         }
+
+        if(origValue != TaskStatusValue.NOT_STARTED && this.status == TaskStatusValue.NOT_STARTED){
+            this.task.setTimeElapsed(0L);
+            this.task.setTimeWorked(0L);
+            this.task.setTimePending(0L);
+        }
     }
 
     public void parseTaskStatusValue(String val){

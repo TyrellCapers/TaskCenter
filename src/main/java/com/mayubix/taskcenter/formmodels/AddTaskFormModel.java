@@ -1,10 +1,8 @@
 package com.mayubix.taskcenter.formmodels;
 
 import com.mayubix.taskcenter.api.TaskStatusValue;
-import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.SimpleIntegerProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
+import javafx.beans.property.*;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -12,7 +10,7 @@ import java.util.List;
 public class AddTaskFormModel {
     private StringProperty nameProperty;
     private StringProperty descriptionProperty;
-    private LocalDate targetDate;
+    private ObjectProperty<LocalDate> targetDate;
     private IntegerProperty sizeProperty;
     private IntegerProperty priorityProperty;
     private List<String>    statusList;
@@ -21,7 +19,7 @@ public class AddTaskFormModel {
     public AddTaskFormModel(){
         nameProperty = new SimpleStringProperty();
         descriptionProperty = new SimpleStringProperty();
-        targetDate = LocalDate.now();
+        targetDate = new SimpleObjectProperty<>();
         sizeProperty = new SimpleIntegerProperty();
         priorityProperty = new SimpleIntegerProperty();
 
@@ -42,7 +40,7 @@ public class AddTaskFormModel {
         return this.descriptionProperty;
     }
 
-    public LocalDate targetDate(){
+    public ObjectProperty<LocalDate> targetDateProperty(){
         return this.targetDate;
     }
 
