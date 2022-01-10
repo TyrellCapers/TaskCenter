@@ -58,7 +58,7 @@ public class HelloApplication extends Application {
         root.getColumnConstraints().add(column0);
         Scene formScene = new Scene(root, 500, 500);
 
-        TaskListDashboard scene = new TaskListDashboard(new AnchorPane(), 500, 500);
+        TaskListDashboard scene = new TaskListDashboard(new AnchorPane(), 500, 500, stage);
         stage.setTitle("Task List Dashboard");
         stage.setScene(scene);
         stage.setOnCloseRequest(new EventHandler<WindowEvent>() {

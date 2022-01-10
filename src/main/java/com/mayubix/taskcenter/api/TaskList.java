@@ -3,6 +3,7 @@ package com.mayubix.taskcenter.api;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -24,6 +25,8 @@ public class TaskList {
     private final Long createTime;
     private ArrayList<Task> tasks;
     private String name;
+
+    private String associatedFileName;
 
     public TaskList(String id, Long createTime){
         this.id = id;
@@ -63,6 +66,10 @@ public class TaskList {
 
     @Override
     public String toString(){
+        if(this.getAssociatedFileName() != null){
+            return this.name + "(" + this.getAssociatedFileName() + ")";
+        }
+
         return this.name;
     }
 
@@ -241,6 +248,154 @@ public class TaskList {
         task.getTaskHistoryItems().remove(item);
     }
 
+    public static ArrayList<TaskList> loadTaskListsFromXML(String fileName){
+        DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder documentBuilder;
+
+        int taskObjectCount = 1;
+
+        try{
+            ArrayList<TaskList> taskLists = new ArrayList<>();
+
+            documentBuilder = documentBuilderFactory.newDocumentBuilder();
+            Document doc = documentBuilder.parse(new File(fileName));
+
+            NodeList taskListElements = doc.getElementsByTagName(TaskList.OBJECT_NAME);
+
+            for(int i = 0; i < taskListElements.getLength(); i++){
+               Element taskListElement = (Element) taskListElements.item(i);
+
+                TaskList taskList = new TaskList(taskListElement.getAttribute("id"), Long.parseLong(taskListElement.getAttribute("createTime")));
+                taskList.setName(taskListElement.getAttribute("name"));
+                NodeList taskElements = taskListElement.getElementsByTagName(Task.OBJECT_NAME);
+
+                for(int j = 0; j < taskElements.getLength(); j++){
+                    Node taskNode = taskElements.item(j);
+                    if(taskNode.getNodeType() == Node.ELEMENT_NODE){
+                        Element taskElement = (Element) taskNode;
+
+                        Task task = new Task(taskElement.getAttribute("id"), Long.parseLong(taskElement.getAttribute("createTime")));
+                        task.setName(taskElement.getAttribute("name"));
+                        task.setDescription(taskElement.getAttribute("description"));
+                        task.setTargetDate(Long.parseLong(taskElement.getAttribute("targetDate")));
+                        task.setTimeElapsed(Long.parseLong(taskElement.getAttribute("timeElapsed")));
+                        task.setTimeWorked(Long.parseLong(taskElement.getAttribute("timeWorked")));
+                        task.setCompletionDate(!taskElement.getAttribute("completionDate").equals("") ? Long.parseLong(taskElement.getAttribute("completionDate")) : null);
+                        task.setTimePassedTargetDate(Long.parseLong(taskElement.getAttribute("timePassedTargetDate")));
+
+
+                        //Create task steps
+                        String currentStepId = taskElement.getAttribute("currentStep");
+                        NodeList stepElements = taskElement.getElementsByTagName(TaskStep.OBJECT_NAME);
+                        for(int k = 0; k < stepElements.getLength(); k++){
+                            Node stepNode = stepElements.item(k);
+                            if(stepNode.getNodeType() == Node.ELEMENT_NODE){
+                                Element stepElement = (Element) stepNode;
+
+                                TaskStep loadedStep = task.createTaskStep(stepElement.getAttribute("id"), stepElement.getAttribute("name"),
+                                        stepElement.getAttribute("description"), Long.parseLong(stepElement.getAttribute("createTime")));
+
+                                loadedStep.parseStatusString(stepElement.getAttribute("statusValue"));
+
+                                if(loadedStep.getId().equals(currentStepId)){
+                                    task.setCurrentStep(loadedStep);
+                                }
+
+                            }
+                        }
+
+                        //Create task notes
+                        NodeList noteElements = taskElement.getElementsByTagName(TaskNote.OBJECT_NAME);
+                        for(int k = 0; k < noteElements.getLength(); k++){
+                            Node noteNode = noteElements.item(k);
+                            if(noteNode.getNodeType() == Node.ELEMENT_NODE){
+                                Element noteElement = (Element) noteNode;
+
+                                TaskNote loadedNote = task.createTaskNote(noteElement.getAttribute("id"),
+                                        Long.parseLong(noteElement.getAttribute("createTime")), noteElement.getAttribute("name"),
+                                        noteElement.getAttribute("content"));
+
+
+                            }
+                        }
+
+                        //Initialize task size
+                        task.setSize(Short.parseShort(taskElement.getAttribute("size")));
+
+                        //Initialize task priority
+                        task.setPriority(Short.parseShort(taskElement.getAttribute("priority")));
+
+                        //Initialize TaskStatus
+                        Element taskStatusElement = (Element) taskElement.getElementsByTagName(TaskStatus.OBJECT_NAME).item(0);
+                        TaskStatus status = new TaskStatus(taskStatusElement.getAttribute("id"),
+                                Long.parseLong(taskStatusElement.getAttribute("createTime")),
+                                task, taskStatusElement.getAttribute("status"));
+                        task.setStatus(status);
+
+                        //Initialize task tags
+                        NodeList tagElements = taskElement.getElementsByTagName(TaskTag.OBJECT_NAME);
+                        for(int k = 0; k < tagElements.getLength(); k++){
+                            Node tagNode = tagElements.item(k);
+                            if(tagNode.getNodeType() == Node.ELEMENT_NODE){
+                                Element tagElement = (Element) tagNode;
+
+                                TaskTag loadedTag = task.createTaskTag(tagElement.getAttribute("id"),
+                                        Long.parseLong(tagElement.getAttribute("createTime")),
+                                        tagElement.getAttribute("name"));
+                            }
+                        }
+
+                        //Initialize the timePending
+                        task.setTimePending(Long.parseLong(taskElement.getAttribute("timePending")));
+
+                        //Initialize the TaskCategory
+                        Element taskCategoryElement = (Element) taskElement.getElementsByTagName(TaskCategory.OBJECT_NAME).item(0);
+                        TaskCategory loadedCategory = new TaskCategory(taskCategoryElement.getAttribute("id"),
+                                Long.parseLong(taskCategoryElement.getAttribute("createTime")), task);
+
+                        loadedCategory.setName(taskCategoryElement.getAttribute("name"));
+                        task.setCategory(loadedCategory);
+
+                        //Initialize Task History Items
+                        NodeList historyElements = taskElement.getElementsByTagName(TaskHistoryItem.OBJECT_NAME);
+                        for(int k = 0; k < historyElements.getLength(); k++){
+                            Node historyNode = historyElements.item(k);
+                            if(historyNode.getNodeType() == Node.ELEMENT_NODE){
+                                Element historyElement = (Element) historyNode;
+
+                                task.createHistoryItem(historyElement.getAttribute("id"),
+                                        Long.parseLong(historyElement.getAttribute("createTime")),
+                                        historyElement.getAttribute("eventName"),
+                                        historyElement.getAttribute("description"),
+                                        Long.parseLong(historyElement.getAttribute("eventTime")));
+
+
+                            }
+                        }
+
+                        String[] idTokens = task.getId().split(":");
+                        int taskIDNum = Integer.parseInt(idTokens[1]);
+                        Task.s_objectCounter = Integer.max(Task.s_objectCounter, taskIDNum);
+                        System.out.println("S Object Counter: " + Task.s_objectCounter);
+                        taskList.getTasks().add(task);
+                        System.out.println("Task List Size: " + taskList.getTasks().size());
+
+                    }
+                }
+
+                taskList.associatedFileName = fileName;
+                taskLists.add(taskList);
+
+
+
+            }
+            return taskLists;
+        }
+        catch(Exception e){
+            return null;
+        }
+    }
+
     public static TaskList loadFromXML(String fileName){
         DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
         DocumentBuilder documentBuilder;
@@ -369,11 +524,152 @@ public class TaskList {
                 }
             }
 
+            taskList.associatedFileName = fileName;
+
             return taskList;
         }
         catch(Exception e){
             e.printStackTrace(System.out);
             return null;
+        }
+    }
+
+    public void quickSave(){
+        if(this.associatedFileName != null){
+            File f = new File(this.associatedFileName);
+            if(f.exists()){
+                saveToXML(this.associatedFileName);
+            }
+            else{
+                throw new IllegalStateException("Trying to quick save and associated file does not exist");
+            }
+        }
+        else{
+            throw new IllegalStateException("Trying to quick save with associated file name null");
+        }
+    }
+
+    public static void saveTaskListsToXML(String fileName, List<TaskList> lists){
+        DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder dBuilder;
+        try{
+            dBuilder = dbFactory.newDocumentBuilder();
+            Document doc = dBuilder.newDocument();
+
+            Element rootElement = doc.createElement("TaskLists");
+            doc.appendChild(rootElement);
+
+            for(TaskList list : lists){
+                Element taskListElement = doc.createElement(TaskList.OBJECT_NAME);
+                taskListElement.setAttribute("id", list.getId());
+                taskListElement.setAttribute("createTime", list.getCreateTime().toString());
+                taskListElement.setAttribute("name", list.getName());
+                rootElement.appendChild(taskListElement);
+
+                //Create the underlying Task Elements
+                for(Task task : list.getTasks()){
+                    Element taskElement = doc.createElement(Task.OBJECT_NAME);
+                    taskElement.setAttribute("id", task.getId());
+                    taskElement.setAttribute("name", task.getName());
+                    taskElement.setAttribute("description", task.getDescription());
+                    taskElement.setAttribute("targetDate", task.getTargetDate().toString());
+                    taskElement.setAttribute("timeElapsed", task.getTimeElapsed().toString());
+                    taskElement.setAttribute("timeWorked", task.getTimeWorked().toString());
+                    taskElement.setAttribute("completionDate", task.getCompletionDate() != null ? task.getCompletionDate().toString() : "");
+                    taskElement.setAttribute("timePassedTargetDate", task.getTimePassedTargetDate().toString());
+                    taskElement.setAttribute("currentStep", task.getCurrentStep() != null ? task.getCurrentStep().getId() : "null");
+                    taskElement.setAttribute("size", task.getSize().toString());
+                    taskElement.setAttribute("priority", task.getPriority().toString());
+                    taskElement.setAttribute("timePending", task.getTimePending().toString());
+                    taskElement.setAttribute("createTime", task.getCreateTime().toString());
+
+                    //Create underlying category
+                    Element categoryElement = doc.createElement(TaskCategory.OBJECT_NAME);
+                    TaskCategory category = task.getCategory();
+
+                    categoryElement.setAttribute("id", category.getId());
+                    categoryElement.setAttribute("name", category.getName());
+                    categoryElement.setAttribute("createTime", category.getCreateTime().toString());
+                    taskElement.appendChild(categoryElement);
+
+                    //Create underlying history items
+                    for(TaskHistoryItem taskHistoryItem : task.getTaskHistoryItems()){
+                        Element taskHistoryItemElement = doc.createElement(TaskHistoryItem.OBJECT_NAME);
+
+                        taskHistoryItemElement.setAttribute("id", taskHistoryItem.getId());
+                        taskHistoryItemElement.setAttribute("description", taskHistoryItem.getDescription());
+                        taskHistoryItemElement.setAttribute("eventName", taskHistoryItem.getEventName());
+                        taskHistoryItemElement.setAttribute("eventTime", taskHistoryItem.getEventTime().toString());
+                        taskHistoryItemElement.setAttribute("createTime", taskHistoryItem.getCreateTime().toString());
+                        taskElement.appendChild(taskHistoryItemElement);
+                    }
+
+                    //Create underlying notes
+                    for(TaskNote note : task.getNotes()){
+                        Element noteElement = doc.createElement(TaskNote.OBJECT_NAME);
+
+                        noteElement.setAttribute("id", note.getId());
+                        noteElement.setAttribute("name", note.getName());
+                        noteElement.setAttribute("content", note.getContent());
+                        noteElement.setAttribute("createTime", note.getCreateTime().toString());
+                        taskElement.appendChild(noteElement);
+                    }
+
+                    //Create underlying status
+                    Element statusElement = doc.createElement(TaskStatus.OBJECT_NAME);
+                    TaskStatus taskStatus = task.getStatus();
+
+                    statusElement.setAttribute("id", taskStatus.getId());
+                    statusElement.setAttribute("status", taskStatus.toString());
+                    statusElement.setAttribute("createTime", taskStatus.getCreateTime().toString());
+                    taskElement.appendChild(statusElement);
+
+                    //Create underlying steps
+                    for(TaskStep taskStep : task.getSteps()){
+                        Element taskStepElement = doc.createElement(TaskStep.OBJECT_NAME);
+
+                        taskStepElement.setAttribute("id", taskStep.getId());
+                        taskStepElement.setAttribute("name", taskStep.getName());
+                        taskStepElement.setAttribute("description", taskStep.getDescription());
+                        taskStepElement.setAttribute("createTime", taskStep.getCreateTime().toString());
+                        taskStepElement.setAttribute("statusValue", taskStep.getStatusValueString());
+                        taskElement.appendChild(taskStepElement);
+                    }
+
+                    //Create underlying tags
+                    for(TaskTag taskTag : task.getTags()){
+                        Element taskTagElement = doc.createElement(TaskTag.OBJECT_NAME);
+
+                        taskTagElement.setAttribute("id", taskTag.getId());
+                        taskTagElement.setAttribute("name", taskTag.getName());
+                        taskTagElement.setAttribute("createTime", taskTag.getCreateTime().toString());
+                        taskElement.appendChild(taskTagElement);
+                    }
+
+                    taskListElement.appendChild(taskElement);
+
+
+
+                    list.associatedFileName = fileName;
+
+                }
+
+            }
+
+            //Create the transformer and source
+            TransformerFactory transformerFactory = TransformerFactory.newInstance();
+            Transformer transformer = transformerFactory.newTransformer();
+            transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+            DOMSource source = new DOMSource(doc);
+
+            //Create the stream result
+            StreamResult file = new StreamResult(new File(fileName));
+
+            //Write the data
+            transformer.transform(source, file);
+        }
+        catch(Exception e){
+
         }
     }
 
@@ -472,23 +768,30 @@ public class TaskList {
 
                 rootElement.appendChild(taskElement);
 
-                //Create the transformer and source
-                TransformerFactory transformerFactory = TransformerFactory.newInstance();
-                Transformer transformer = transformerFactory.newTransformer();
-                transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-                DOMSource source = new DOMSource(doc);
 
-                //Create the stream result
-                StreamResult file = new StreamResult(new File(fileName));
-
-                //Write the data
-                transformer.transform(source, file);
 
             }
+            //Create the transformer and source
+            TransformerFactory transformerFactory = TransformerFactory.newInstance();
+            Transformer transformer = transformerFactory.newTransformer();
+            transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+            DOMSource source = new DOMSource(doc);
+
+            //Create the stream result
+            StreamResult file = new StreamResult(new File(fileName));
+
+            //Write the data
+            transformer.transform(source, file);
+
+            this.associatedFileName = fileName;
         }
         catch(Exception e){
             e.printStackTrace(System.out);
         }
+    }
+
+    public String getAssociatedFileName(){
+        return this.associatedFileName;
     }
 
 

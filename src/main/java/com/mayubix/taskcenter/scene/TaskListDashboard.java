@@ -65,9 +65,14 @@ public class TaskListDashboard extends Scene {
     private Button    slNew;
     private HBox      slLayout;
 
+    private String    associatedFileName;
 
-    public TaskListDashboard(Parent root){
+    private Stage     stage;
+
+
+    public TaskListDashboard(Parent root, Stage stage){
         super(root);
+        this.stage = stage;
         layout = new GridPane();
         buildLayout();
 
@@ -75,40 +80,45 @@ public class TaskListDashboard extends Scene {
 
     }
 
-    public TaskListDashboard(Parent root, double width, double height){
+    public TaskListDashboard(Parent root, double width, double height, Stage stage){
         super(root, width, height);
+        this.stage = stage;
         layout = new GridPane();
         buildLayout();
 
         this.setRoot(layout);
     }
 
-    public TaskListDashboard(Parent root, double width, double height, boolean depthBuffer) {
+    public TaskListDashboard(Parent root, double width, double height, boolean depthBuffer, Stage stage) {
         super(root, width, height, depthBuffer);
+        this.stage = stage;
         layout = new GridPane();
         buildLayout();
 
         this.setRoot(layout);
     }
 
-    public TaskListDashboard(Parent root, double width, double height, boolean depthBuffer, SceneAntialiasing antiAliasing){
+    public TaskListDashboard(Parent root, double width, double height, boolean depthBuffer, SceneAntialiasing antiAliasing, Stage stage){
         super(root, width, height, depthBuffer, antiAliasing);
+        this.stage = stage;
         layout = new GridPane();
         buildLayout();
 
         this.setRoot(layout);
     }
 
-    public TaskListDashboard(Parent root, double width, double height, Paint fill){
+    public TaskListDashboard(Parent root, double width, double height, Paint fill, Stage stage){
         super(root, width, height, fill);
+        this.stage = stage;
         layout = new GridPane();
         buildLayout();
 
         this.setRoot(layout);
     }
 
-    public TaskListDashboard(Parent root, Paint fill){
+    public TaskListDashboard(Parent root, Paint fill, Stage stage){
         super(root, fill);
+        this.stage = stage;
         layout = new GridPane();
         buildLayout();
 
@@ -288,9 +298,16 @@ public class TaskListDashboard extends Scene {
 
         Menu fileMenu = new Menu("File");
         Menu newMenu  = new Menu("New");
+
         MenuItem newTaskListMenuItem = new MenuItem("Task List...");
+        MenuItem saveMI = new MenuItem("Save");
+        MenuItem saveAsMI = new MenuItem("Save As");
+        MenuItem loadMI = new MenuItem("Load");
+
+
+
         newMenu.getItems().addAll(newTaskListMenuItem);
-        fileMenu.getItems().addAll(newMenu);
+        fileMenu.getItems().addAll(newMenu, saveMI, saveAsMI, loadMI);
 
         menuBar.getMenus().add(fileMenu);
 
@@ -308,6 +325,61 @@ public class TaskListDashboard extends Scene {
                    tlListView.getItems().add(formPopup.getTaskList());
                }
 
+            }
+        });
+
+        saveMI.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent actionEvent) {
+
+                if(associatedFileName != null){
+                    File f = new File(associatedFileName);
+                    if(f.exists()){
+                        TaskList.saveTaskListsToXML(associatedFileName, tlListView.getItems());
+                    }
+                }
+                else{
+                    FileChooser fileChooser = new FileChooser();
+                    fileChooser.setTitle("Save Task List");
+                    File selectedFile = fileChooser.showSaveDialog(null);
+                    if(selectedFile != null){
+                        TaskList.saveTaskListsToXML(selectedFile.getAbsolutePath(), tlListView.getItems());
+                        associatedFileName = selectedFile.getAbsolutePath();
+                        stage.setTitle("Task List Dashboard - " + associatedFileName);
+                    }
+                }
+            }
+        });
+
+        saveAsMI.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent actionEvent) {
+                    FileChooser fileChooser = new FileChooser();
+                    fileChooser.setTitle("Save Task List");
+                    File selectedFile = fileChooser.showSaveDialog(null);
+                    if(selectedFile != null){
+                        TaskList.saveTaskListsToXML(selectedFile.getAbsolutePath(), tlListView.getItems());
+                        associatedFileName = selectedFile.getAbsolutePath();
+                        stage.setTitle("Task List Dashboard - " + associatedFileName);
+                    }
+                }
+        });
+
+        loadMI.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent actionEvent) {
+                FileChooser fileChooser = new FileChooser();
+                fileChooser.setTitle("Load Task List");
+                File selectedFile = fileChooser.showOpenDialog(null);
+                if(selectedFile != null) {
+                    ArrayList<TaskList> lists = TaskList.loadTaskListsFromXML(selectedFile.getAbsolutePath());
+                    if(lists != null) {
+                        cleanDashboard();
+                        tlListView.getItems().addAll(lists);
+                        associatedFileName = selectedFile.getAbsolutePath();
+                        stage.setTitle("Task List Dashboard - " + associatedFileName);
+                    }
+                }
             }
         });
 
@@ -437,9 +509,6 @@ public class TaskListDashboard extends Scene {
         slSaveAll = new Button("Save All");
         slNew = new Button("New");
         slLayout = new HBox();
-
-
-        slLayout.getChildren().addAll(slLoad, slSave, slSaveAll, slNew);
 
         slLoad.setOnAction(new EventHandler<ActionEvent>() {
             @Override
@@ -704,5 +773,27 @@ public class TaskListDashboard extends Scene {
             }
         }
 
+    }
+
+    private void cleanDashboard(){
+        for(TaskList list : tlListView.getItems()){
+            for(Task t : list.getTasks()){
+                list.removeTask(t);
+            }
+        }
+
+        for(Object obj : tlTable.getItems()){
+            TaskUI ui = (TaskUI) obj;
+            ui.clean();
+        }
+
+        tlTable.getItems().clear();
+        tlListView.getItems().clear();
+
+        refreshTaskTable();
+        refreshNotesList();
+        refreshTagsList();
+        refreshHistoryTable();
+        refreshStepTable();
     }
 }
