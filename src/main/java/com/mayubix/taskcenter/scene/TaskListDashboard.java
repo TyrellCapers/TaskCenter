@@ -157,11 +157,7 @@ public class TaskListDashboard extends Scene {
               selectedTaskList = tlListView.getSelectionModel().getSelectedItem();
               if(selectedTaskList != null){
                   selectedTaskListText.setText("Selected Task List: " + selectedTaskList.getName());
-                  refreshTaskTable();
-                  refreshStepTable();
-                  refreshHistoryTable();
-                  refreshNotesList();
-                  refreshTagsList();
+                  refresh();
               }
               else{
                   selectedTaskListText.setText("Selected Task List: N/A");
@@ -183,7 +179,7 @@ public class TaskListDashboard extends Scene {
         actionListView.getItems().add("Set Task Step Incomplete");
         actionListView.getItems().add("Set Task Step Complete");
         actionListView.getItems().add("Set Current Step");
-        actionListView.getItems().add("Test Action");
+        actionListView.getItems().add("New Task List");
 
         //Execute Action Button=========================================================================================
         executeActionBtn = new Button("Execute Action");
@@ -286,10 +282,7 @@ public class TaskListDashboard extends Scene {
         tlTable.setOnMouseClicked(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent mouseEvent) {
-                refreshStepTable();
-                refreshHistoryTable();
-                refreshNotesList();
-                refreshTagsList();
+                refresh();
             }
         });
 
@@ -315,71 +308,28 @@ public class TaskListDashboard extends Scene {
         newTaskListMenuItem.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {
-               Stage eventStage = new Stage();
-               NewTaskListFormPopup formPopup = new NewTaskListFormPopup(new AnchorPane(), 300, 300, eventStage);
-               eventStage.setTitle(NewTaskListFormPopup.TITLE);
-               eventStage.setScene(formPopup);
-               eventStage.showAndWait();
-
-               if(formPopup.getRunTransaction()){
-                   tlListView.getItems().add(formPopup.getTaskList());
-               }
-
+                newTaskListTransaction();
             }
         });
 
         saveMI.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {
-
-                if(associatedFileName != null){
-                    File f = new File(associatedFileName);
-                    if(f.exists()){
-                        TaskList.saveTaskListsToXML(associatedFileName, tlListView.getItems());
-                    }
-                }
-                else{
-                    FileChooser fileChooser = new FileChooser();
-                    fileChooser.setTitle("Save Task List");
-                    File selectedFile = fileChooser.showSaveDialog(null);
-                    if(selectedFile != null){
-                        TaskList.saveTaskListsToXML(selectedFile.getAbsolutePath(), tlListView.getItems());
-                        associatedFileName = selectedFile.getAbsolutePath();
-                        stage.setTitle("Task List Dashboard - " + associatedFileName);
-                    }
-                }
+                save();
             }
         });
 
         saveAsMI.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {
-                    FileChooser fileChooser = new FileChooser();
-                    fileChooser.setTitle("Save Task List");
-                    File selectedFile = fileChooser.showSaveDialog(null);
-                    if(selectedFile != null){
-                        TaskList.saveTaskListsToXML(selectedFile.getAbsolutePath(), tlListView.getItems());
-                        associatedFileName = selectedFile.getAbsolutePath();
-                        stage.setTitle("Task List Dashboard - " + associatedFileName);
-                    }
-                }
+                saveAs();
+            }
         });
 
         loadMI.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {
-                FileChooser fileChooser = new FileChooser();
-                fileChooser.setTitle("Load Task List");
-                File selectedFile = fileChooser.showOpenDialog(null);
-                if(selectedFile != null) {
-                    ArrayList<TaskList> lists = TaskList.loadTaskListsFromXML(selectedFile.getAbsolutePath());
-                    if(lists != null) {
-                        cleanDashboard();
-                        tlListView.getItems().addAll(lists);
-                        associatedFileName = selectedFile.getAbsolutePath();
-                        stage.setTitle("Task List Dashboard - " + associatedFileName);
-                    }
-                }
+                load();
             }
         });
 
@@ -449,12 +399,7 @@ public class TaskListDashboard extends Scene {
         addNoteBtn.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {
-                TaskUI selectedUI   = (TaskUI) tlTable.getSelectionModel().getSelectedItem();
-                if(selectedUI != null){
-                    Task selectedTask = selectedUI.getTask();
-                    selectedTask.createTaskNote(addNoteTextField.getText(), "");
-                    refreshNotesList();
-                }
+                addNoteTransaction();
             }
         });
 
@@ -488,12 +433,7 @@ public class TaskListDashboard extends Scene {
         addTagBtn.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {
-                TaskUI selectedUI   = (TaskUI) tlTable.getSelectionModel().getSelectedItem();
-                if(selectedUI != null){
-                    Task selectedTask = selectedUI.getTask();
-                    selectedTask.createTaskTag(addTagTextField.getText());
-                    refreshTagsList();
-                }
+                addTagTransaction();
             }
         });
 
@@ -513,45 +453,21 @@ public class TaskListDashboard extends Scene {
         slLoad.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {
-                FileChooser fileChooser = new FileChooser();
-                fileChooser.setTitle("Load Task List");
-                File selectedFile = fileChooser.showOpenDialog(null);
-                if(selectedFile != null) {
-                    System.out.println("Loading newTaskList");
-                    TaskList newTaskList = TaskList.loadFromXML(selectedFile.getAbsolutePath());
-                    System.out.println("New Task List Name: " + newTaskList.getName());
-                    tlListView.getItems().add(newTaskList);
-                    System.out.println("Number of items in tlListView..." + tlListView.getItems().size());
-                }
+                load();
             }
         });
 
         slSave.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {
-                if(selectedTaskList != null){
-                    FileChooser fileChooser = new FileChooser();
-                    fileChooser.setTitle("Save Task List");
-                    File selectedFile = fileChooser.showSaveDialog(null);
-                    if(selectedFile != null){
-                        selectedTaskList.saveToXML(selectedFile.getAbsolutePath());
-                    }
-                }
+                save();
             }
         });
 
         slNew.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {
-                Stage eventStage = new Stage();
-                NewTaskListFormPopup formPopup = new NewTaskListFormPopup(new AnchorPane(), 300, 300, eventStage);
-                eventStage.setTitle(NewTaskListFormPopup.TITLE);
-                eventStage.setScene(formPopup);
-                eventStage.showAndWait();
-
-                if(formPopup.getRunTransaction()){
-                    tlListView.getItems().add(formPopup.getTaskList());
-                }
+                newTaskListTransaction();
             }
         });
 
@@ -601,113 +517,61 @@ public class TaskListDashboard extends Scene {
         TaskUI selectedTaskUI;
         StepUI selectedStepUI;
         TaskStep   selectedStep;
+        Double centerX;
+        Double centerY;
+
         switch(actionName){
             case "Add Task":
-                actionStage = new Stage();
-                AddTaskPopup addTaskPopup = new AddTaskPopup(new AnchorPane(), 500, 500, actionStage);
-                actionStage.setTitle(AddTaskPopup.TITLE);
-                actionStage.setScene(addTaskPopup);
-                actionStage.showAndWait();
-
-                if(addTaskPopup.getRunTransaction() && selectedTaskList != null){
-                    selectedTaskList.getTasks().add(addTaskPopup.getNewTask());
-                    refreshTaskTable();
-                }
-
+                addTaskTransaction();
                 break;
             case "Remove Task" :
-                selectedTaskUI = (TaskUI) tlTable.getSelectionModel().getSelectedItem();
-                if(selectedTaskUI != null && selectedTaskList != null){
-                    selectedTaskList.removeTask(selectedTaskUI.getTask());
-                    selectedTaskUI.clean();
-                    refreshTaskTable();
-                }
+                removeTaskTransaction();
                 break;
 
             case "Remove Task Step" :
-                selectedStepUI = (StepUI) stepsTable.getSelectionModel().getSelectedItem();
-                if(selectedStepUI != null){
-                    selectedStep = selectedStepUI.getStep();
-                    selectedStep.getTask().getSteps().remove(selectedStep);
-                    selectedStep.clean();
-                    refreshStepTable();
-                }
+                removeTaskStepTransaction();
                 break;
 
             case "Set Task Not Started" :
-                selectedTaskUI = (TaskUI) tlTable.getSelectionModel().getSelectedItem();
-                if(selectedTaskUI != null && selectedTaskList != null){
-                    selectedTaskUI.getTask().getStatus().setStatus(TaskStatusValue.NOT_STARTED);
-                }
+                setTaskNotStartedTransaction();
                 break;
             case "Set Task Idle":
-                selectedTaskUI = (TaskUI) tlTable.getSelectionModel().getSelectedItem();
-                if(selectedTaskUI != null && selectedTaskList != null){
-                    selectedTaskUI.getTask().getStatus().setStatus(TaskStatusValue.IDLE);
-                }
+                setTaskIdleTransaction();
                 break;
             case "Set Task Working" :
-                selectedTaskUI = (TaskUI) tlTable.getSelectionModel().getSelectedItem();
-                if(selectedTaskUI != null && selectedTaskList != null){
-                    selectedTaskUI.getTask().getStatus().setStatus(TaskStatusValue.WORKING);
-                }
+                setTaskWorkingTransaction();
                 break;
             case "Set Task Pending" :
-                selectedTaskUI = (TaskUI) tlTable.getSelectionModel().getSelectedItem();
-                if(selectedTaskUI != null && selectedTaskList != null){
-                    selectedTaskUI.getTask().getStatus().setStatus(TaskStatusValue.PENDING);
-                }
+                setTaskPendingTransaction();
                 break;
             case "Set Task Completed" :
-                selectedTaskUI = (TaskUI) tlTable.getSelectionModel().getSelectedItem();
-                if(selectedTaskUI != null && selectedTaskList != null){
-                    selectedTaskUI.getTask().getStatus().setStatus(TaskStatusValue.COMPLETED);
-                }
+                setTaskCompletedTransaction();
                 break;
             case "Add Task Step" :
-                actionStage = new Stage();
-                AddStepPopup addStepPopup = new AddStepPopup(new AnchorPane(), 500, 500, actionStage, selectedTaskList);
-                actionStage.setTitle(AddStepPopup.TITLE);
-                actionStage.setScene(addStepPopup);
-                actionStage.showAndWait();
-                refreshStepTable();
+                addTaskStepTransaction();
                 break;
             case "Set Task Step Incomplete" :
-
-                selectedStepUI = (StepUI) stepsTable.getSelectionModel().getSelectedItem();
-                if(selectedStepUI != null){
-                    selectedStep = selectedStepUI.getStep();
-                    selectedStep.setStatusValue(TaskStepStatusValue.INCOMPLETE);
-                    refreshStepTable();
-                }
+                setTaskStepIncompleteTransaction();
                 break;
             case "Set Task Step Complete" :
-
-                selectedStepUI = (StepUI) stepsTable.getSelectionModel().getSelectedItem();
-                if(selectedStepUI != null){
-                    selectedStep = selectedStepUI.getStep();
-                    selectedStep.setStatusValue(TaskStepStatusValue.COMPLETE);
-                    refreshStepTable();
-                }
+                setTaskStepCompleteTransaction();
                 break;
 
             case "Set Current Step" :
-                selectedStepUI = (StepUI) stepsTable.getSelectionModel().getSelectedItem();
-                selectedTaskUI = (TaskUI) tlTable.getSelectionModel().getSelectedItem();
-                if(selectedStepUI != null && selectedTaskUI != null && selectedTaskList != null){
-                    selectedStep = selectedStepUI.getStep();
-                    selectedTaskList.setTaskCurrentStep(selectedTaskUI.getTask(), selectedStep);
-                }
+                setCurrentStepTransaction();
                 break;
 
-            case "Test Action" :
-                System.out.println("Test Action Executed...");
+            case "New Task List" :
+                newTaskListTransaction();
                 break;
+
             default :
                 break;
         }
     }
 
+
+//Refresh Functions=====================================================================================================
     private void refreshTaskTable(){
         if(selectedTaskList != null){
             for(Object obj : tlTable.getItems()){
@@ -775,6 +639,19 @@ public class TaskListDashboard extends Scene {
 
     }
 
+    private void refresh(){
+        refreshTaskTable();
+        refreshStepTable();
+        refreshHistoryTable();
+        refreshNotesList();
+        refreshTagsList();
+
+        if(associatedFileName != null){
+            save();
+        }
+    }
+
+    //Clean Functions-===============================================================================================
     private void cleanDashboard(){
         for(TaskList list : tlListView.getItems()){
             for(Task t : list.getTasks()){
@@ -790,10 +667,217 @@ public class TaskListDashboard extends Scene {
         tlTable.getItems().clear();
         tlListView.getItems().clear();
 
-        refreshTaskTable();
-        refreshNotesList();
-        refreshTagsList();
-        refreshHistoryTable();
-        refreshStepTable();
+        refresh();
+    }
+
+    //Transactions======================================================================================================
+
+    private void addTaskTransaction(){
+        Stage actionStage = new Stage();
+        AddTaskPopup addTaskPopup = new AddTaskPopup(new AnchorPane(), 500, 500, actionStage);
+        actionStage.setTitle(AddTaskPopup.TITLE);
+
+        //Center the eventStage
+        double centerX = stage.getX() + stage.getWidth()/2;
+        double centerY = stage.getY() + stage.getHeight()/2;
+        actionStage.setX(centerX - addTaskPopup.getWidth()/2);
+        actionStage.setY(centerY - addTaskPopup.getHeight()/2);
+
+        actionStage.setScene(addTaskPopup);
+        actionStage.showAndWait();
+
+        if(addTaskPopup.getRunTransaction() && selectedTaskList != null){
+            selectedTaskList.getTasks().add(addTaskPopup.getNewTask());
+            refresh();
+        }
+    }
+
+    private void removeTaskTransaction(){
+        TaskUI selectedTaskUI = (TaskUI) tlTable.getSelectionModel().getSelectedItem();
+        if(selectedTaskUI != null && selectedTaskList != null){
+            selectedTaskList.removeTask(selectedTaskUI.getTask());
+            selectedTaskUI.clean();
+            refresh();
+        }
+    }
+
+    private void removeTaskStepTransaction(){
+        StepUI selectedStepUI = (StepUI) stepsTable.getSelectionModel().getSelectedItem();
+        if(selectedStepUI != null){
+            TaskStep selectedStep = selectedStepUI.getStep();
+            selectedStep.getTask().getSteps().remove(selectedStep);
+            selectedStep.clean();
+            refresh();
+        }
+    }
+
+    private void setTaskNotStartedTransaction(){
+        TaskUI selectedTaskUI = (TaskUI) tlTable.getSelectionModel().getSelectedItem();
+        if(selectedTaskUI != null && selectedTaskList != null){
+            selectedTaskUI.getTask().getStatus().setStatus(TaskStatusValue.NOT_STARTED);
+            refresh();
+        }
+    }
+
+    private void setTaskIdleTransaction(){
+        TaskUI selectedTaskUI = (TaskUI) tlTable.getSelectionModel().getSelectedItem();
+        if(selectedTaskUI != null && selectedTaskList != null){
+            selectedTaskUI.getTask().getStatus().setStatus(TaskStatusValue.IDLE);
+            refresh();
+        }
+    }
+
+    private void setTaskWorkingTransaction(){
+        TaskUI selectedTaskUI = (TaskUI) tlTable.getSelectionModel().getSelectedItem();
+        if(selectedTaskUI != null && selectedTaskList != null){
+            selectedTaskUI.getTask().getStatus().setStatus(TaskStatusValue.WORKING);
+            refresh();
+        }
+    }
+
+    private void setTaskPendingTransaction(){
+        TaskUI selectedTaskUI = (TaskUI) tlTable.getSelectionModel().getSelectedItem();
+        if(selectedTaskUI != null && selectedTaskList != null){
+            selectedTaskUI.getTask().getStatus().setStatus(TaskStatusValue.PENDING);
+            refresh();
+        }
+    }
+
+    private void setTaskCompletedTransaction(){
+        TaskUI selectedTaskUI = (TaskUI) tlTable.getSelectionModel().getSelectedItem();
+        if(selectedTaskUI != null && selectedTaskList != null){
+            selectedTaskUI.getTask().getStatus().setStatus(TaskStatusValue.COMPLETED);
+            refresh();
+        }
+    }
+
+    private void addTaskStepTransaction(){
+        Stage actionStage = new Stage();
+        AddStepPopup addStepPopup = new AddStepPopup(new AnchorPane(), 500, 500, actionStage, selectedTaskList);
+        actionStage.setTitle(AddStepPopup.TITLE);
+
+        //Center the eventStage
+        double centerX = stage.getX() + stage.getWidth()/2;
+        double centerY = stage.getY() + stage.getHeight()/2;
+        actionStage.setX(centerX - addStepPopup.getWidth()/2);
+        actionStage.setY(centerY - addStepPopup.getHeight()/2);
+
+        actionStage.setScene(addStepPopup);
+        actionStage.showAndWait();
+        refresh();
+    }
+
+    private void setTaskStepIncompleteTransaction(){
+        StepUI selectedStepUI = (StepUI) stepsTable.getSelectionModel().getSelectedItem();
+        if(selectedStepUI != null){
+            TaskStep selectedStep = selectedStepUI.getStep();
+            selectedStep.setStatusValue(TaskStepStatusValue.INCOMPLETE);
+            refresh();
+        }
+    }
+
+    private void setTaskStepCompleteTransaction(){
+
+        StepUI selectedStepUI = (StepUI) stepsTable.getSelectionModel().getSelectedItem();
+        if(selectedStepUI != null){
+            TaskStep selectedStep = selectedStepUI.getStep();
+            selectedStep.setStatusValue(TaskStepStatusValue.COMPLETE);
+            refresh();
+        }
+    }
+
+    private void setCurrentStepTransaction(){
+        StepUI selectedStepUI = (StepUI) stepsTable.getSelectionModel().getSelectedItem();
+        TaskUI selectedTaskUI = (TaskUI) tlTable.getSelectionModel().getSelectedItem();
+        if(selectedStepUI != null && selectedTaskUI != null && selectedTaskList != null){
+            TaskStep selectedStep = selectedStepUI.getStep();
+            selectedTaskList.setTaskCurrentStep(selectedTaskUI.getTask(), selectedStep);
+            refresh();
+        }
+    }
+
+    private void newTaskListTransaction(){
+        Stage eventStage = new Stage();
+        NewTaskListFormPopup formPopup = new NewTaskListFormPopup(new AnchorPane(), 300, 300, eventStage);
+        eventStage.setTitle(NewTaskListFormPopup.TITLE);
+
+        //Center the eventStage
+        double centerX = stage.getX() + stage.getWidth()/2;
+        double centerY = stage.getY() + stage.getHeight()/2;
+        eventStage.setX(centerX - formPopup.getWidth()/2);
+        eventStage.setY(centerY - formPopup.getHeight()/2);
+
+        eventStage.setScene(formPopup);
+        eventStage.showAndWait();
+
+        if(formPopup.getRunTransaction()){
+            tlListView.getItems().add(formPopup.getTaskList());
+            refresh();
+        }
+    }
+
+    private void addNoteTransaction(){
+        TaskUI selectedUI   = (TaskUI) tlTable.getSelectionModel().getSelectedItem();
+        if(selectedUI != null){
+            Task selectedTask = selectedUI.getTask();
+            selectedTask.createTaskNote(addNoteTextField.getText(), "");
+            refresh();
+        }
+    }
+
+    private void addTagTransaction(){
+        TaskUI selectedUI   = (TaskUI) tlTable.getSelectionModel().getSelectedItem();
+        if(selectedUI != null){
+            Task selectedTask = selectedUI.getTask();
+            selectedTask.createTaskTag(addTagTextField.getText());
+            refresh();
+        }
+    }
+
+    //System Functions==================================================================================================
+    private void load(){
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Load Task List");
+        File selectedFile = fileChooser.showOpenDialog(null);
+        if(selectedFile != null) {
+            ArrayList<TaskList> lists = TaskList.loadTaskListsFromXML(selectedFile.getAbsolutePath());
+            if(lists != null) {
+                cleanDashboard();
+                tlListView.getItems().addAll(lists);
+                associatedFileName = selectedFile.getAbsolutePath();
+                stage.setTitle("Task List Dashboard - " + associatedFileName);
+            }
+        }
+    }
+
+    private void save(){
+
+        if(associatedFileName != null){
+            File f = new File(associatedFileName);
+            if(f.exists()){
+                TaskList.saveTaskListsToXML(associatedFileName, tlListView.getItems());
+            }
+        }
+        else{
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("Save Task List");
+            File selectedFile = fileChooser.showSaveDialog(null);
+            if(selectedFile != null){
+                TaskList.saveTaskListsToXML(selectedFile.getAbsolutePath(), tlListView.getItems());
+                associatedFileName = selectedFile.getAbsolutePath();
+                stage.setTitle("Task List Dashboard - " + associatedFileName);
+            }
+        }
+    }
+
+    private void saveAs(){
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Save Task List");
+        File selectedFile = fileChooser.showSaveDialog(null);
+        if(selectedFile != null){
+            TaskList.saveTaskListsToXML(selectedFile.getAbsolutePath(), tlListView.getItems());
+            associatedFileName = selectedFile.getAbsolutePath();
+            stage.setTitle("Task List Dashboard - " + associatedFileName);
+        }
     }
 }
