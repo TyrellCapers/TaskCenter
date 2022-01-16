@@ -157,7 +157,7 @@ public class TaskListDashboard extends Scene {
               selectedTaskList = tlListView.getSelectionModel().getSelectedItem();
               if(selectedTaskList != null){
                   selectedTaskListText.setText("Selected Task List: " + selectedTaskList.getName());
-                  refresh();
+                  refresh("SelectTaskList");
               }
               else{
                   selectedTaskListText.setText("Selected Task List: N/A");
@@ -282,7 +282,7 @@ public class TaskListDashboard extends Scene {
         tlTable.setOnMouseClicked(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent mouseEvent) {
-                refresh();
+                refresh("SelectTask");
             }
         });
 
@@ -639,12 +639,74 @@ public class TaskListDashboard extends Scene {
 
     }
 
-    private void refresh(){
-        refreshTaskTable();
-        refreshStepTable();
-        refreshHistoryTable();
-        refreshNotesList();
-        refreshTagsList();
+    private void refresh(String context){
+        switch(context){
+
+            case "SelectTaskList":
+                refreshTaskTable();
+                refreshStepTable();
+                refreshHistoryTable();
+                refreshNotesList();
+                refreshTagsList();
+                break;
+
+            case "SelectTask":
+                refreshStepTable();
+                refreshHistoryTable();
+                refreshNotesList();
+                refreshTagsList();
+                break;
+
+            case "ModifyAll":
+                refreshTaskTable();
+                refreshStepTable();
+                refreshHistoryTable();
+                refreshNotesList();
+                refreshTagsList();
+                break;
+
+            case "AddTask":
+                refreshTaskTable();
+                break;
+
+            case "RemoveTask":
+                refreshTaskTable();
+                break;
+
+            case "RemoveTaskStep":
+                refreshStepTable();
+                break;
+
+            case "SetTaskStatus":
+                refreshTaskTable();
+                break;
+
+            case "AddTaskStep":
+                refreshStepTable();
+                break;
+
+            case "SetTaskStepStatus":
+                refreshStepTable();
+                break;
+
+            case "SetCurrentStep":
+                refreshTaskTable();
+                break;
+
+            case "NewTaskList":
+                break;
+
+            case "AddNote":
+                refreshNotesList();
+                break;
+
+            case "AddTag":
+                refreshTagsList();
+                break;
+
+            default:
+                break;
+        }
 
         if(associatedFileName != null){
             save();
@@ -667,7 +729,7 @@ public class TaskListDashboard extends Scene {
         tlTable.getItems().clear();
         tlListView.getItems().clear();
 
-        refresh();
+        refresh("ModifyAll");
     }
 
     //Transactions======================================================================================================
@@ -688,7 +750,7 @@ public class TaskListDashboard extends Scene {
 
         if(addTaskPopup.getRunTransaction() && selectedTaskList != null){
             selectedTaskList.getTasks().add(addTaskPopup.getNewTask());
-            refresh();
+            refresh("AddTask");
         }
     }
 
@@ -697,7 +759,7 @@ public class TaskListDashboard extends Scene {
         if(selectedTaskUI != null && selectedTaskList != null){
             selectedTaskList.removeTask(selectedTaskUI.getTask());
             selectedTaskUI.clean();
-            refresh();
+            refresh("RemoveTask");
         }
     }
 
@@ -707,7 +769,7 @@ public class TaskListDashboard extends Scene {
             TaskStep selectedStep = selectedStepUI.getStep();
             selectedStep.getTask().getSteps().remove(selectedStep);
             selectedStep.clean();
-            refresh();
+            refresh("RemoveTaskStep");
         }
     }
 
@@ -715,7 +777,7 @@ public class TaskListDashboard extends Scene {
         TaskUI selectedTaskUI = (TaskUI) tlTable.getSelectionModel().getSelectedItem();
         if(selectedTaskUI != null && selectedTaskList != null){
             selectedTaskUI.getTask().getStatus().setStatus(TaskStatusValue.NOT_STARTED);
-            refresh();
+            refresh("SetTaskStatus");
         }
     }
 
@@ -723,7 +785,7 @@ public class TaskListDashboard extends Scene {
         TaskUI selectedTaskUI = (TaskUI) tlTable.getSelectionModel().getSelectedItem();
         if(selectedTaskUI != null && selectedTaskList != null){
             selectedTaskUI.getTask().getStatus().setStatus(TaskStatusValue.IDLE);
-            refresh();
+            refresh("SetTaskStatus");
         }
     }
 
@@ -731,7 +793,7 @@ public class TaskListDashboard extends Scene {
         TaskUI selectedTaskUI = (TaskUI) tlTable.getSelectionModel().getSelectedItem();
         if(selectedTaskUI != null && selectedTaskList != null){
             selectedTaskUI.getTask().getStatus().setStatus(TaskStatusValue.WORKING);
-            refresh();
+            refresh("SetTaskStatus");
         }
     }
 
@@ -739,7 +801,7 @@ public class TaskListDashboard extends Scene {
         TaskUI selectedTaskUI = (TaskUI) tlTable.getSelectionModel().getSelectedItem();
         if(selectedTaskUI != null && selectedTaskList != null){
             selectedTaskUI.getTask().getStatus().setStatus(TaskStatusValue.PENDING);
-            refresh();
+            refresh("SetTaskStatus");
         }
     }
 
@@ -747,7 +809,7 @@ public class TaskListDashboard extends Scene {
         TaskUI selectedTaskUI = (TaskUI) tlTable.getSelectionModel().getSelectedItem();
         if(selectedTaskUI != null && selectedTaskList != null){
             selectedTaskUI.getTask().getStatus().setStatus(TaskStatusValue.COMPLETED);
-            refresh();
+            refresh("SetTaskStatus");
         }
     }
 
@@ -764,7 +826,7 @@ public class TaskListDashboard extends Scene {
 
         actionStage.setScene(addStepPopup);
         actionStage.showAndWait();
-        refresh();
+        refresh("AddTaskStep");
     }
 
     private void setTaskStepIncompleteTransaction(){
@@ -772,7 +834,7 @@ public class TaskListDashboard extends Scene {
         if(selectedStepUI != null){
             TaskStep selectedStep = selectedStepUI.getStep();
             selectedStep.setStatusValue(TaskStepStatusValue.INCOMPLETE);
-            refresh();
+            refresh("SetTaskStepStatus");
         }
     }
 
@@ -782,7 +844,7 @@ public class TaskListDashboard extends Scene {
         if(selectedStepUI != null){
             TaskStep selectedStep = selectedStepUI.getStep();
             selectedStep.setStatusValue(TaskStepStatusValue.COMPLETE);
-            refresh();
+            refresh("SetTaskStepStatus");
         }
     }
 
@@ -792,7 +854,7 @@ public class TaskListDashboard extends Scene {
         if(selectedStepUI != null && selectedTaskUI != null && selectedTaskList != null){
             TaskStep selectedStep = selectedStepUI.getStep();
             selectedTaskList.setTaskCurrentStep(selectedTaskUI.getTask(), selectedStep);
-            refresh();
+            refresh("SetCurrentStep");
         }
     }
 
@@ -812,7 +874,7 @@ public class TaskListDashboard extends Scene {
 
         if(formPopup.getRunTransaction()){
             tlListView.getItems().add(formPopup.getTaskList());
-            refresh();
+            refresh("NewTaskList");
         }
     }
 
@@ -821,7 +883,7 @@ public class TaskListDashboard extends Scene {
         if(selectedUI != null){
             Task selectedTask = selectedUI.getTask();
             selectedTask.createTaskNote(addNoteTextField.getText(), "");
-            refresh();
+            refresh("AddNote");
         }
     }
 
@@ -830,7 +892,7 @@ public class TaskListDashboard extends Scene {
         if(selectedUI != null){
             Task selectedTask = selectedUI.getTask();
             selectedTask.createTaskTag(addTagTextField.getText());
-            refresh();
+            refresh("AddTag");
         }
     }
 

@@ -376,9 +376,7 @@ public class TaskList {
                         String[] idTokens = task.getId().split(":");
                         int taskIDNum = Integer.parseInt(idTokens[1]);
                         Task.s_objectCounter = Integer.max(Task.s_objectCounter, taskIDNum);
-                        System.out.println("S Object Counter: " + Task.s_objectCounter);
                         taskList.getTasks().add(task);
-                        System.out.println("Task List Size: " + taskList.getTasks().size());
 
                     }
                 }
@@ -517,9 +515,7 @@ public class TaskList {
                     String[] idTokens = task.getId().split(":");
                     int taskIDNum = Integer.parseInt(idTokens[1]);
                     Task.s_objectCounter = Integer.max(Task.s_objectCounter, taskIDNum);
-                    System.out.println("S Object Counter: " + Task.s_objectCounter);
                     taskList.getTasks().add(task);
-                    System.out.println("Task List Size: " + taskList.getTasks().size());
 
                 }
             }
