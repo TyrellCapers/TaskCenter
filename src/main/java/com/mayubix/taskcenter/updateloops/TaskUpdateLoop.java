@@ -17,8 +17,10 @@ public class TaskUpdateLoop implements Runnable {
 
     //[3.1] The Update Loop Logic 1
     private void updateTask(Task task){
-        //Calculate time elapsed
-        task.setTimeElapsed(System.currentTimeMillis() - task.getCreateTime());
+        //Calculate time elapsed if task is not completed
+        if(task.getStatus().getStatus() != TaskStatusValue.COMPLETED) {
+            task.setTimeElapsed(System.currentTimeMillis() - task.getCreateTime());
+        }
 
         //Calculate time pending and time worked
         if(task.getStatus().getStatus() == TaskStatusValue.PENDING){
